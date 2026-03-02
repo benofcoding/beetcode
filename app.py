@@ -1,7 +1,11 @@
 from flask import Flask, render_template, redirect
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, Session
-from sqlalchemy import String, Integer, ForeignKey, select, create_engine
+from sqlalchemy.orm import (DeclarativeBase,
+                            Mapped,
+                            mapped_column,
+                            relationship,
+                            Session)
+from sqlalchemy import String, ForeignKey, select, create_engine
 from typing import List
 
 app = Flask(__name__)
@@ -89,6 +93,12 @@ engine = create_engine("sqlite:///instance/database.db")  # or your DB URL
 @app.route("/")
 def home():
     return render_template('index.html')
+
+
+@app.route("/problem/<int:problem_id>")
+def problem(problem_id):
+    return render_template('problem.html')
+
 
 if __name__ == "__main__":
     app.run(debug=True)

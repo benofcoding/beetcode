@@ -21,12 +21,21 @@ p {
     margin: 0;
 }
 
-.navbar{
+.navbar {
     height: 10vh;
     background-color: aqua;
 }
 
-.footer{
+.footer {
     height: 10vh;
     background-color: green;
+}
+
+.description_editor_parent {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.editor {
+    height: 70vh;
 }
