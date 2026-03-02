@@ -19,12 +19,23 @@
     require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
     require(['vs/editor/editor.main'], function() {
         editor = monaco.editor.create(document.getElementById("editor"), {
-            value: "print('HI BENGI')",
+            value: "def hi_benji(name):\n    print(name)",
             language: "python",
             theme: "vs-dark",
             automaticLayout: true
         });
     });
+
+    async function run_code() {
+        const response = await fetch('/run_code', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 'code': editor.getValue() })
+        })
+        
+        console.log(editor.getValue())
+        console.log(await response.json())
+    }
 </script>
 </body>
 </html>

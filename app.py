@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect
+from flask import Flask, render_template, redirect, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import (DeclarativeBase,
                             Mapped,
@@ -6,7 +6,10 @@ from sqlalchemy.orm import (DeclarativeBase,
                             relationship,
                             Session)
 from sqlalchemy import String, ForeignKey, select, create_engine
-from typing import List
+from typing import List, Any
+import subprocess
+import sys
+import json
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "a-very-secret-secret-key"
@@ -42,6 +45,7 @@ class Problem(Base):
     __tablename__ = "Problem"
     problem_id: Mapped[int] = mapped_column(primary_key=True)
     description: Mapped[str] = mapped_column(String)
+    function_name: Mapped[str] = mapped_column(String)
 
     user_problems: Mapped[list["User_Problem"]] = relationship("User_Problem", back_populates="problem")
 
@@ -98,6 +102,42 @@ def home():
 @app.route("/problem/<int:problem_id>")
 def problem(problem_id):
     return render_template('problem.html')
+
+
+@app.route('/run_code', methods=['POST'])
+def your_route():
+    data = request.get_json()
+    code = data['code']
+    code = code.replace('\n', '\n    ')
+
+    func_name = 'hi_benji' #GET REAL FUNC NAME FROM DATABASE DO LATER
+    input_variables = {'name':'benjiriono'} #GET REAL INPUT VARIABLES FROM DATABASE DO LATER
+
+
+    wrapper = f"""
+    import json, sys
+    data = json.loads(sys.stdin.read())
+
+    {code}
+
+    result = {func_name}(**data)
+    
+    if result is not None:
+        print('__RETURN__',  result)
+    """
+
+    wrapper = wrapper.replace('\n    ', '\n')
+
+    result = subprocess.run(
+        [sys.executable, "-c", wrapper],
+        input=json.dumps(input_variables),
+        capture_output=True, text=True, timeout=5
+    )
+
+    
+
+    return jsonify({ 'output':result.stdout, 'error':result.stderr})
+
 
 
 if __name__ == "__main__":
