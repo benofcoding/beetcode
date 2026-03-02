@@ -46,6 +46,7 @@ class Problem(Base):
     problem_id: Mapped[int] = mapped_column(primary_key=True)
     description: Mapped[str] = mapped_column(String)
     function_name: Mapped[str] = mapped_column(String)
+    function_args: Mapped[str] = mapped_column(String)
 
     user_problems: Mapped[list["User_Problem"]] = relationship("User_Problem", back_populates="problem")
 
@@ -101,14 +102,18 @@ def home():
 
 @app.route("/problem/<int:problem_id>")
 def problem(problem_id):
-    return render_template('problem.html')
+    return render_template('problem.html', problem_id=problem_id)
 
 
 @app.route('/run_code', methods=['POST'])
 def your_route():
+    print_limit = 1000
+
     data = request.get_json()
     code = data['code']
     code = code.replace('\n', '\n    ')
+
+    print(data)
 
     func_name = 'hi_benji' #GET REAL FUNC NAME FROM DATABASE DO LATER
     input_variables = {'name':'benjiriono'} #GET REAL INPUT VARIABLES FROM DATABASE DO LATER
@@ -134,9 +139,19 @@ def your_route():
         capture_output=True, text=True, timeout=5
     )
 
-    
+    returned = False
+    output_lines = list(result.stdout.splitlines())
 
-    return jsonify({ 'output':result.stdout, 'error':result.stderr})
+    if len(output_lines) <= print_limit:
+        for line in output_lines:
+            if '__RETURN__' in line:
+                returned_output = line.removeprefix("__RETURN__ ")
+                returned = True
+
+    if returned:
+        output_lines.remove("__RETURN__ "+returned_output)
+
+    return jsonify({'output': output_lines, 'error': result.stderr})
 
 
 

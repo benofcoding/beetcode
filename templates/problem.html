@@ -30,7 +30,7 @@
         const response = await fetch('/run_code', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 'code': editor.getValue() })
+            body: JSON.stringify({ 'code': editor.getValue(), 'problem_id': {{problem_id}} })
         })
         
         console.log(editor.getValue())
