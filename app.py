@@ -79,11 +79,14 @@ class Test(Base):
     test: Mapped[Dict[str, Any]] = mapped_column(JSON)
     type: Mapped[str] = mapped_column(String)
     problem_id: Mapped[int] = mapped_column(ForeignKey("Problem.problem_id"))
+    test_num: Mapped[int]
+    result: Mapped[str] = mapped_column(String)
 
     problem: Mapped["Problem"] = relationship("Problem", back_populates="tests")
 
 
 engine = create_engine("sqlite:///instance/database.db")
+
 
 @app.route("/")
 def home():
@@ -104,10 +107,9 @@ def your_route():
     code = code.replace('\n', '\n    ')
     problem_id = data['problem_id']
 
-    print(data)
-
     with Session(engine) as session:
-        problem = session.scalar(select(Problem).where(Problem.problem_id == problem_id))
+        q = select(Problem).where(Problem.problem_id == problem_id)
+        problem = session.scalar(q)
         tests = problem.tests
 
     wrapper = f"""
@@ -123,25 +125,43 @@ def your_route():
     """
 
     wrapper = wrapper.replace('\n    ', '\n')
+    results = []
 
-    result = subprocess.run(
-        [sys.executable, "-c", wrapper],
-        input=json.dumps(input_variables),
-        capture_output=True, text=True, timeout=5
-    )
+    return_dictionary = {}
 
-    returned = False
-    output_lines = list(result.stdout.splitlines())
+    for test in tests:
+        returned = False
+        testcase = test.test
+        result = subprocess.run(
+            [sys.executable, "-c", wrapper],
+            input=json.dumps(testcase),
+            capture_output=True, text=True, timeout=5
+        )
 
-    if len(output_lines) <= print_limit:
-        for line in output_lines:
-            if '__RETURN__' in line:
-                returned_output = line.removeprefix("__RETURN__ ")
-                returned = True
+        returned_output = None
 
-    if returned:
-        output_lines.remove("__RETURN__ "+returned_output)
+        output_lines = list(result.stdout.splitlines())
+        if len(output_lines) <= print_limit:
+            for line in output_lines:
+                if '__RETURN__' in line:
+                    returned_output = line.removeprefix("__RETURN__ ")
+                    returned = True
 
+        status = 'not returned'
+
+        if returned:
+            if returned_output == test.result:
+                status = 'pass'
+            else:
+                status = 'fail'
+
+        return_dictionary[test.test_num] = {'output': output_lines, 'error': result.stderr, 'status': status,
+                                            'testcase': (test.test, test.result), 'returned_output': returned_output}
+
+
+    print(return_dictionary[1])
+    print(return_dictionary[2])
+    
     return jsonify({'output': output_lines, 'error': result.stderr})
 
 
