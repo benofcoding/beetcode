@@ -5,8 +5,8 @@ from sqlalchemy.orm import (DeclarativeBase,
                             mapped_column,
                             relationship,
                             Session)
-from sqlalchemy import String, ForeignKey, select, create_engine
-from typing import List, Any
+from sqlalchemy import String, ForeignKey, select, create_engine, JSON
+from typing import List, Any, Dict
 import subprocess
 import sys
 import json
@@ -76,24 +76,14 @@ class Tag(Base):
 class Test(Base):
     __tablename__ = "Test"
     test_id: Mapped[int] = mapped_column(primary_key=True)
-    test: Mapped[str] = mapped_column(String)
+    test: Mapped[Dict[str, Any]] = mapped_column(JSON)
     type: Mapped[str] = mapped_column(String)
     problem_id: Mapped[int] = mapped_column(ForeignKey("Problem.problem_id"))
 
     problem: Mapped["Problem"] = relationship("Problem", back_populates="tests")
 
 
-engine = create_engine("sqlite:///instance/database.db")  # or your DB URL
-
-
-
-
-
-
-
-
-
-
+engine = create_engine("sqlite:///instance/database.db")
 
 @app.route("/")
 def home():
@@ -112,12 +102,13 @@ def your_route():
     data = request.get_json()
     code = data['code']
     code = code.replace('\n', '\n    ')
+    problem_id = data['problem_id']
 
     print(data)
 
-    func_name = 'hi_benji' #GET REAL FUNC NAME FROM DATABASE DO LATER
-    input_variables = {'name':'benjiriono'} #GET REAL INPUT VARIABLES FROM DATABASE DO LATER
-
+    with Session(engine) as session:
+        problem = session.scalar(select(Problem).where(Problem.problem_id == problem_id))
+        tests = problem.tests
 
     wrapper = f"""
     import json, sys
@@ -125,8 +116,8 @@ def your_route():
 
     {code}
 
-    result = {func_name}(**data)
-    
+    result = {problem.function_name}(**data)
+
     if result is not None:
         print('__RETURN__',  result)
     """
@@ -152,7 +143,6 @@ def your_route():
         output_lines.remove("__RETURN__ "+returned_output)
 
     return jsonify({'output': output_lines, 'error': result.stderr})
-
 
 
 if __name__ == "__main__":
