@@ -158,11 +158,7 @@ def your_route():
         return_dictionary[test.test_num] = {'output': output_lines, 'error': result.stderr, 'status': status,
                                             'testcase': (test.test, test.result), 'returned_output': returned_output}
 
-
-    print(return_dictionary[1])
-    print(return_dictionary[2])
-    
-    return jsonify({'output': output_lines, 'error': result.stderr})
+    return jsonify(return_dictionary)
 
 
 if __name__ == "__main__":
