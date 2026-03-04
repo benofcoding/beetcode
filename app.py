@@ -155,8 +155,12 @@ def your_route():
             else:
                 status = 'fail'
 
-        return_dictionary[test.test_num] = {'output': output_lines, 'error': result.stderr, 'status': status,
+        print(test.type, test.test_id)
+
+        return_dictionary[test.test_num] = {'output': output_lines, 'error': result.stderr, 'status': status, 'type': test.type,
                                             'testcase': (test.test, test.result), 'returned_output': returned_output}
+
+    print(return_dictionary)
 
     return jsonify(return_dictionary)
 

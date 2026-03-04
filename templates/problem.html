@@ -7,12 +7,13 @@
     <title></title> <!-- ADD TITLE -->
 </head>
 <body>
-    <div class="description_editor_parent">
-        <div class="problem_description">DESCRIPTION GOES HERE</div>
-        <div class="editor_submit_parent">
-            <div id="editor", class="editor"></div>
+    <div class="main-container">
+        <div class="problem-description">DESCRIPTION GOES HERE</div>
+        <div class="editor-submit-parent">
+            <div id="editor" class="editor"></div>
             <button onclick="run_code()">▶ Run Code</button>
         </div>
+        <div class="testcases"></div>
     </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.js"></script>
 <script>
@@ -30,11 +31,33 @@
         const response = await fetch('/run_code', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 'code': editor.getValue(), 'problem_id': {{problem_id}} })
+            body: JSON.stringify({ 'code': editor.getValue(), 'problem_id': "{{problem_id}}" })
         })
-        
-        console.log(editor.getValue())
-        console.log(await response.json())
+
+        data = await response.json()
+        console.log(JSON.parse(JSON.stringify(data)))
+
+        console.log(data)
+
+        format_testcases(data)
+    }
+
+    function format_testcases(data) {
+        // const testcase_container = document.getElementById("testcase_container");
+        // testcase_container.textContent = data[1].output;
+
+        const public_tests = []
+
+        for (testcase in data) {
+            console.log(data[testcase])
+            if (data[testcase].type == 'public') {
+                console.log(data[testcase].type)
+                public_tests.push(testcase)
+            }
+        }
+
+        console.log(public_tests)
+
     }
 </script>
 </body>

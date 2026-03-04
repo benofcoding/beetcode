@@ -31,11 +31,17 @@ p {
     background-color: green;
 }
 
-.description_editor_parent {
+.main-container {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
 }
 
 .editor {
     height: 70vh;
+    width: 100%;
+}
+
+.editor-submit-parent {
+    min-width: 0; /* 👈 key fix — stops grid cell from overflowing */
+    width: 100%;
 }
