@@ -55,6 +55,18 @@ class Problem(Base):
     problem_tags: Mapped[List["Problem_Tag"]] = relationship("Problem_Tag", back_populates="problem")
 
 
+class Test(Base):
+    __tablename__ = "Test"
+    test_id: Mapped[int] = mapped_column(primary_key=True)
+    test: Mapped[Dict[str, Any]] = mapped_column(JSON)
+    type: Mapped[str] = mapped_column(String)
+    problem_id: Mapped[int] = mapped_column(ForeignKey("Problem.problem_id"))
+    test_num: Mapped[int]
+    result: Mapped[str] = mapped_column(String)
+
+    problem: Mapped["Problem"] = relationship("Problem", back_populates="tests")
+
+
 class Problem_Tag(Base):
     __tablename__ = "Problem_Tag"
     problem_tag_id: Mapped[int] = mapped_column(primary_key=True)
@@ -71,18 +83,6 @@ class Tag(Base):
     tag: Mapped[str] = mapped_column(String)
 
     problem_tags: Mapped[List["Problem_Tag"]] = relationship("Problem_Tag", back_populates="tag")
-
-
-class Test(Base):
-    __tablename__ = "Test"
-    test_id: Mapped[int] = mapped_column(primary_key=True)
-    test: Mapped[Dict[str, Any]] = mapped_column(JSON)
-    type: Mapped[str] = mapped_column(String)
-    problem_id: Mapped[int] = mapped_column(ForeignKey("Problem.problem_id"))
-    test_num: Mapped[int]
-    result: Mapped[str] = mapped_column(String)
-
-    problem: Mapped["Problem"] = relationship("Problem", back_populates="tests")
 
 
 engine = create_engine("sqlite:///instance/database.db")

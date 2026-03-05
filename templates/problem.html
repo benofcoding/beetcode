@@ -38,9 +38,11 @@
         });
 
         data = await response.json();
-        console.log(JSON.parse(JSON.stringify(data)));
 
-        console.log(data);
+        const testcase_container = document.getElementById("testcase-container");
+    while (testcase_container.firstChild) {
+        testcase_container.removeChild(lastChild);
+    }
 
         format_testcases(data);
     }
@@ -58,7 +60,6 @@
         const testcase_button_container = document.getElementById("testcase-button-container");
 
         for (const [index, testcase] of public_tests.entries()) {
-
             const current_testcase = document.createElement("div");
             
             current_testcase.id = "public_testcase_" + (index+1);
@@ -66,34 +67,47 @@
 
             testcase_container.appendChild(current_testcase);
 
+            const testcase_variables_title = document.createElement("p")
+            const testcase_correct_output_title = document.createElement("p")
+            const testcase_user_output_title = document.createElement("p")
+
+            testcase_variables_title.textContent = "Testcase:"
+            testcase_correct_output_title.textContent = "Expected Output:"
+            testcase_user_output_title.textContent = "output:"
+
+            testcase_variables_title.className = "testcase-title"
+            testcase_correct_output_title.className = "testcase-title"
+            testcase_user_output_title.className = "testcase-title"
+
+            current_testcase.appendChild(testcase_variables_title)
+
             const testcase_user_output = document.createElement("div");
             const testcase_correct_output = document.createElement("div");
             const testcase_button = document.createElement("button");
 
-
+            testcase_user_output.className = "testcase-output-field testcase-user-output"
+            testcase_correct_output.className = "testcase-output-field testcase-correct-output"
 
             testcase_user_output.textContent = data[testcase].output;
-            testcase_user_output.className = 'testcase-user-output'
+            testcase_correct_output.textContent = data[testcase].testcase[1]
 
             testcase_button.onclick = () => show_testcase((index+1));
             testcase_button.textContent = "Test #" + (index+1);
 
+            const testcase_variables_container = document.createElement("div")
+            testcase_variables_container.className = "testcase-output-field"
+            current_testcase.appendChild(testcase_variables_container)
 
             for (const variable in data[testcase].testcase[0]) {
                 const testcase_value = document.createElement("div");
                 testcase_value.textContent = variable + " = " + data[testcase].testcase[0][variable];
                 testcase_value.className = 'testcase-value'
-                current_testcase.appendChild(testcase_value);
+                testcase_variables_container.appendChild(testcase_value);
             }
 
-            testcase_correct_output.className = 'testcase-correct-output'
-            testcase_correct_output.textContent = data[testcase].testcase[1]
-
-            console.log(testcase);
-            console.log(data[testcase].output);
-
-
+            current_testcase.appendChild(testcase_correct_output_title)
             current_testcase.appendChild(testcase_correct_output);
+            current_testcase.appendChild(testcase_user_output_title)
             current_testcase.appendChild(testcase_user_output);
             testcase_button_container.appendChild(testcase_button);
             current_testcase.style.display = "none";

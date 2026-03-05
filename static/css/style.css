@@ -7,7 +7,7 @@ body {
     padding: 0;
     margin: 0;
     font-family: sans-serif;
-    background-color: #e7e7e7;
+    background-color: white;
     font-size: 1vw;
     text-decoration-color: black;
 }
@@ -63,14 +63,12 @@ p {
     margin-bottom: 2em;
 }
 
-.testcase-user-output {
-    background-color: white;
+.testcase-title {
+    font-size: 2em;
 }
 
-.testcase-value {
-    background-color: blueviolet;
-}
-
-.testcase-correct-output {
-    background-color: chocolate;
+.testcase-output-field {
+    margin: 1em;
+    padding: 0.5em;
+    background-color: grey;
 }
