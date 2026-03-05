@@ -12,6 +12,10 @@ body {
     text-decoration-color: black;
 }
 
+button {
+    display: block;
+}
+
 main {
     min-height: 80vh;
 }
@@ -44,4 +48,29 @@ p {
 .editor-submit-parent {
     min-width: 0; /* 👈 key fix — stops grid cell from overflowing */
     width: 100%;
+}
+
+.testcases {
+    margin: 1em;
+    padding: 1em;
+    background-color: blue;
+    border-radius: 1em;
+}
+
+.testcase-button-container {
+    display: flex;
+    gap: 1em;
+    margin-bottom: 2em;
+}
+
+.testcase-user-output {
+    background-color: white;
+}
+
+.testcase-value {
+    background-color: blueviolet;
+}
+
+.testcase-correct-output {
+    background-color: chocolate;
 }

@@ -13,7 +13,10 @@
             <div id="editor" class="editor"></div>
             <button onclick="run_code()">▶ Run Code</button>
         </div>
-        <div class="testcases"></div>
+        <div id="testcases" class="testcases">
+            <div id="testcase-button-container" class="testcase-button-container"></div>
+            <div id="testcase-container"></div>
+        </div>
     </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.js"></script>
 <script>
@@ -32,33 +35,84 @@
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 'code': editor.getValue(), 'problem_id': "{{problem_id}}" })
-        })
+        });
 
-        data = await response.json()
-        console.log(JSON.parse(JSON.stringify(data)))
+        data = await response.json();
+        console.log(JSON.parse(JSON.stringify(data)));
 
-        console.log(data)
+        console.log(data);
 
-        format_testcases(data)
+        format_testcases(data);
     }
 
     function format_testcases(data) {
-        // const testcase_container = document.getElementById("testcase_container");
-        // testcase_container.textContent = data[1].output;
-
-        const public_tests = []
+        const public_tests = [];
 
         for (testcase in data) {
-            console.log(data[testcase])
             if (data[testcase].type == 'public') {
-                console.log(data[testcase].type)
-                public_tests.push(testcase)
+                public_tests.push(testcase);
             }
         }
 
-        console.log(public_tests)
+        const testcase_container = document.getElementById("testcase-container");
+        const testcase_button_container = document.getElementById("testcase-button-container");
 
+        for (const [index, testcase] of public_tests.entries()) {
+
+            const current_testcase = document.createElement("div");
+            
+            current_testcase.id = "public_testcase_" + (index+1);
+            current_testcase.className = "testcase";
+
+            testcase_container.appendChild(current_testcase);
+
+            const testcase_user_output = document.createElement("div");
+            const testcase_correct_output = document.createElement("div");
+            const testcase_button = document.createElement("button");
+
+
+
+            testcase_user_output.textContent = data[testcase].output;
+            testcase_user_output.className = 'testcase-user-output'
+
+            testcase_button.onclick = () => show_testcase((index+1));
+            testcase_button.textContent = "Test #" + (index+1);
+
+
+            for (const variable in data[testcase].testcase[0]) {
+                const testcase_value = document.createElement("div");
+                testcase_value.textContent = variable + " = " + data[testcase].testcase[0][variable];
+                testcase_value.className = 'testcase-value'
+                current_testcase.appendChild(testcase_value);
+            }
+
+            testcase_correct_output.className = 'testcase-correct-output'
+            testcase_correct_output.textContent = data[testcase].testcase[1]
+
+            console.log(testcase);
+            console.log(data[testcase].output);
+
+
+            current_testcase.appendChild(testcase_correct_output);
+            current_testcase.appendChild(testcase_user_output);
+            testcase_button_container.appendChild(testcase_button);
+            current_testcase.style.display = "none";
+        }
+
+        testcase_container.firstChild.style.display = "block";
     }
+
+    function show_testcase(testcase_id) {
+        const public_testcases = document.getElementById("testcase-container");
+
+        for (const testcase of public_testcases.children) {
+            console.log("hi");
+            testcase.style.display = 'none';
+        }
+        
+        const special_testcase = document.getElementById("public_testcase_" + testcase_id);
+        special_testcase.style.display = 'block';
+    }   
 </script>
 </body>
 </html>
