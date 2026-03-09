@@ -7,9 +7,12 @@ from sqlalchemy.orm import (DeclarativeBase,
                             Session)
 from sqlalchemy import String, ForeignKey, select, create_engine, JSON
 from typing import List, Any, Dict
+from wtforms import StringField, SubmitField
+from wtforms.validators import DataRequired
 import subprocess
 import sys
 import json
+
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "a-very-secret-secret-key"
@@ -90,7 +93,10 @@ engine = create_engine("sqlite:///instance/database.db")
 
 @app.route("/")
 def home():
-    return render_template('index.html')
+    with Session(engine) as session:
+        q = select(Problem)
+        problems = session.scalars(q).all()
+    return render_template('index.html', problems=problems)
 
 
 @app.route("/problem/<int:problem_id>")
@@ -155,14 +161,14 @@ def run_code():
         status = 'not returned'
 
         if returned:
-            del output_lines[index]
+            del output_lines[returned_index]
             if returned_output == test.result:
                 status = 'pass'
             else:
                 status = 'fail'
 
         return_dictionary[test.test_id] = {'output': output_lines, 'error': result.stderr, 'status': status, 'type': test.type,
-                                            'testcase': (test.test, test.result), 'returned_output': returned_output}
+                                           'testcase': (test.test, test.result), 'returned_output': returned_output}
 
     return jsonify(return_dictionary)
 
