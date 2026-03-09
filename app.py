@@ -95,11 +95,15 @@ def home():
 
 @app.route("/problem/<int:problem_id>")
 def problem(problem_id):
-    return render_template('problem.html', problem_id=problem_id)
+    with Session(engine) as session:
+        q = select(Problem).where(Problem.problem_id == problem_id)
+        problem = session.scalar(q)
+
+    return render_template('problem.html', problem_id=problem_id, function_name=problem.function_name, function_args=problem.function_args)
 
 
 @app.route('/run_code', methods=['POST'])
-def your_route():
+def run_code():
     print_limit = 1000
 
     data = request.get_json()
@@ -142,14 +146,16 @@ def your_route():
 
         output_lines = list(result.stdout.splitlines())
         if len(output_lines) <= print_limit:
-            for line in output_lines:
+            for index, line in enumerate(output_lines):
                 if '__RETURN__' in line:
                     returned_output = line.removeprefix("__RETURN__ ")
                     returned = True
+                    returned_index = index
 
         status = 'not returned'
 
         if returned:
+            del output_lines[index]
             if returned_output == test.result:
                 status = 'pass'
             else:

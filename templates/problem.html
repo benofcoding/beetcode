@@ -23,7 +23,7 @@
     require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
     require(['vs/editor/editor.main'], function() {
         editor = monaco.editor.create(document.getElementById("editor"), {
-            value: "def hi_benji(name):\n    print(name)",
+            value: "def {{ function_name }}{{ function_args }}:",
             language: "python",
             theme: "vs-dark",
             automaticLayout: true
@@ -39,10 +39,15 @@
 
         data = await response.json();
 
+        console.log(data)
+
+        const testcase_button_container = document.getElementById("testcase-button-container")
         const testcase_container = document.getElementById("testcase-container");
-    while (testcase_container.firstChild) {
-        testcase_container.removeChild(lastChild);
-    }
+        while (testcase_container.firstChild) {
+            testcase_container.children[0].remove();
+            testcase_button_container.children[0].remove();
+
+        }
 
         format_testcases(data);
     }
@@ -70,25 +75,31 @@
             const testcase_variables_title = document.createElement("p")
             const testcase_correct_output_title = document.createElement("p")
             const testcase_user_output_title = document.createElement("p")
+            const testcase_user_stdout_title = document.createElement("p")
 
             testcase_variables_title.textContent = "Testcase:"
             testcase_correct_output_title.textContent = "Expected Output:"
-            testcase_user_output_title.textContent = "output:"
+            testcase_user_output_title.textContent = "Output:"
+            testcase_user_stdout_title.textContent = "Stdout:"
 
             testcase_variables_title.className = "testcase-title"
             testcase_correct_output_title.className = "testcase-title"
             testcase_user_output_title.className = "testcase-title"
+            testcase_user_stdout_title.className = "testcase-title"
 
             current_testcase.appendChild(testcase_variables_title)
 
+            const testcase_user_stdout = document.createElement("div");
             const testcase_user_output = document.createElement("div");
             const testcase_correct_output = document.createElement("div");
             const testcase_button = document.createElement("button");
 
+            testcase_user_stdout.className = "testcase-output-field testcase-user-stdout"
             testcase_user_output.className = "testcase-output-field testcase-user-output"
             testcase_correct_output.className = "testcase-output-field testcase-correct-output"
 
-            testcase_user_output.textContent = data[testcase].output;
+            testcase_user_stdout.textContent = data[testcase].output;
+            testcase_user_output.textContent = data[testcase].returned_output;
             testcase_correct_output.textContent = data[testcase].testcase[1]
 
             testcase_button.onclick = () => show_testcase((index+1));
@@ -109,8 +120,26 @@
             current_testcase.appendChild(testcase_correct_output);
             current_testcase.appendChild(testcase_user_output_title)
             current_testcase.appendChild(testcase_user_output);
+            current_testcase.appendChild(testcase_user_stdout_title)
+            current_testcase.appendChild(testcase_user_stdout);
             testcase_button_container.appendChild(testcase_button);
             current_testcase.style.display = "none";
+
+            if (data[testcase].status == 'pass') {
+                [...current_testcase.children].forEach(element => {
+                    if (element.classList[0] == "testcase-output-field") {
+                        console.log(element )
+                        element.style.backgroundColor = "#8ad492";
+                    }
+                });
+            } else if (data[testcase].status == 'fail') {
+                [...current_testcase.children].forEach(element => {
+                    if (element.classList[0] == "testcase-output-field") {
+                        console.log(element )
+                        element.style.backgroundColor = "#c95959";
+                    }
+                }); 
+            }
         }
 
         testcase_container.firstChild.style.display = "block";
