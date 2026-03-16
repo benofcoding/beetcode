@@ -7,8 +7,9 @@ from sqlalchemy.orm import (DeclarativeBase,
                             Session)
 from sqlalchemy import String, ForeignKey, select, create_engine, JSON
 from typing import List, Any, Dict
-from wtforms import StringField, SubmitField
-from wtforms.validators import DataRequired
+from wtforms import StringField, SubmitField, PasswordField, validators, Form,
+from wtforms.validators import DataRequired, InputRequired
+from flask_login import UserMixin
 import subprocess
 import sys
 import json
@@ -22,7 +23,7 @@ class Base(DeclarativeBase):
     pass
 
 
-class User(Base):
+class User(Base, UserMixin):
     __tablename__ = "User"
     user_id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String)
@@ -91,12 +92,26 @@ class Tag(Base):
 engine = create_engine("sqlite:///instance/database.db")
 
 
+class LoginForm(Form):
+    username = StringField("Name", validators=[validators.InputRequired()])
+    password = PasswordField('Password',validators=[validators.InputRequired()])
+
+
 @app.route("/")
 def home():
     with Session(engine) as session:
         q = select(Problem)
         problems = session.scalars(q).all()
     return render_template('index.html', problems=problems)
+
+
+@app.route('/login', methods=["get", 'post'])
+def login():
+    form = LoginForm(request.form)
+    if request.method == "post":
+        pass
+    return render_template("login.html", form=form)
+
 
 
 @app.route("/problem/<int:problem_id>")
