@@ -1,4 +1,9 @@
 <div class="navbar">
-    <div>hi</div>
+    <div>{{current_user.name}}</div>
+    {%if current_user.is_authenticated %}
+    <form action="/logout">
+        <button type="submit">logout</button>
+    </form>
+    {%endif%}
 </div>
 

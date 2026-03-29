@@ -1,15 +1,25 @@
-from flask import Flask, render_template, redirect, request, jsonify
+from flask import Flask, render_template, redirect, request, jsonify, url_for
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import (DeclarativeBase,
                             Mapped,
                             mapped_column,
                             relationship,
                             Session)
-from sqlalchemy import String, ForeignKey, select, create_engine, JSON
+from sqlalchemy import (String,
+                        ForeignKey,
+                        select,
+                        create_engine,
+                        JSON)
 from typing import List, Any, Dict
-from wtforms import StringField, SubmitField, PasswordField, validators, Form,
+from wtforms import StringField, SubmitField, PasswordField, validators, Form
 from wtforms.validators import DataRequired, InputRequired
-from flask_login import UserMixin
+from flask_login import (UserMixin,
+                         LoginManager,
+                         login_user,
+                         login_required,
+                         logout_user,
+                         current_user)
+from hashlib import sha256
 import subprocess
 import sys
 import json
@@ -17,7 +27,9 @@ import json
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "a-very-secret-secret-key"
-
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = "login"
 
 class Base(DeclarativeBase):
     pass
@@ -31,6 +43,9 @@ class User(Base, UserMixin):
     hash: Mapped[str] = mapped_column(String)
 
     user_problems: Mapped[list["User_Problem"]] = relationship("User_Problem", back_populates="user")
+    @property
+    def id(self):
+        return self.user_id
 
 
 class User_Problem(Base):
@@ -97,6 +112,14 @@ class LoginForm(Form):
     password = PasswordField('Password',validators=[validators.InputRequired()])
 
 
+@login_manager.user_loader
+def load_user(user_id):
+    query = select(User).where(User.user_id == user_id)
+    with Session(engine) as session:
+        obj = session.scalar(query)
+    return obj
+
+
 @app.route("/")
 def home():
     with Session(engine) as session:
@@ -105,13 +128,32 @@ def home():
     return render_template('index.html', problems=problems)
 
 
-@app.route('/login', methods=["get", 'post'])
+@app.route('/login', methods=["GET", 'POST'])
 def login():
     form = LoginForm(request.form)
-    if request.method == "post":
-        pass
+    if request.method == "POST":
+        with Session(engine) as session:
+            query = select(User).where(User.name == form.username.data)
+            user = session.scalar(query)
+
+        h = sha256()
+        h.update(form.password.data.encode())
+        hash = h.hexdigest()
+        print(hash)
+
+        if hash != user.hash:
+            return render_template("login.html", form=form)
+        
+        login_user(user)
+        return redirect(url_for("problem_list"))
     return render_template("login.html", form=form)
 
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
 
 
 @app.route("/problem/<int:problem_id>")
@@ -121,6 +163,11 @@ def problem(problem_id):
         problem = session.scalar(q)
 
     return render_template('problem.html', problem_id=problem_id, function_name=problem.function_name, function_args=problem.function_args)
+
+
+@app.route('/problem_list')
+def problem_list():
+    return render_template("problem_list.html")
 
 
 @app.route('/run_code', methods=['POST'])
