@@ -66,6 +66,9 @@ class Problem(Base):
     description: Mapped[str] = mapped_column(String)
     function_name: Mapped[str] = mapped_column(String)
     function_args: Mapped[str] = mapped_column(String)
+    type: Mapped[str] = mapped_column(String)
+    problem_name: Mapped[str] = mapped_column(String)
+    difficulty: Mapped[str] = mapped_column(String)
 
     user_problems: Mapped[list["User_Problem"]] = relationship("User_Problem", back_populates="problem")
 
@@ -122,10 +125,7 @@ def load_user(user_id):
 
 @app.route("/")
 def home():
-    with Session(engine) as session:
-        q = select(Problem)
-        problems = session.scalars(q).all()
-    return render_template('index.html', problems=problems)
+    return redirect(url_for("problem_list"))
 
 
 @app.route('/login', methods=["GET", 'POST'])
@@ -165,9 +165,18 @@ def problem(problem_id):
     return render_template('problem.html', problem_id=problem_id, function_name=problem.function_name, function_args=problem.function_args)
 
 
-@app.route('/problem_list')
+@app.route('/problem_list', methods=["GET", "POST"])
 def problem_list():
-    return render_template("problem_list.html")
+    if request.method == "POST":
+        pass  # PAGE NMBER DO LATER
+
+    page_num = 0
+    query = select(Problem).order_by(Problem.problem_id).offset(page_num*100).limit(100)
+    with Session(engine) as session:
+        temp_problems = session.scalars(query).all()
+        problems = [{'problem_id': i.problem_id, 'name': i.problem_name, 'difficulty': i.difficulty, 'type': i.type} for i in temp_problems]
+
+    return render_template("problem_list.html", problems=problems)
 
 
 @app.route('/run_code', methods=['POST'])

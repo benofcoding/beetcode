@@ -1,5 +1,22 @@
 {% extends "layout.html" %} {% block content %}
-{% for i in problems %}
-<h1>{{i.problem_id}}</h1>
-{% endfor %}
+<div class="problem-list">
+    <div class="problem-list-column-names">
+        <div>#</div>
+        <div>Name</div>
+        <div>type</div>
+        <div>Difficulty</div>
+    </div>
+    <!-- iterate through all problems and display their information-->
+    {% for problem in problems %}
+    <hr class="problem-list-row-gap" />
+    <div class="problem-list-columns">
+        <div class="problem-list-column-container">{{ problem["problem_id"] }}</div>
+        <div class="problem-list-column-container">
+            <a class="problem-link" href="/problem/{{ problem['problem_id'] }}">{{ problem["name"] }}</a>
+        </div>
+        <div class="problem-list-column-container">{{ problem["type"] }}</div>
+        <div class="problem-list-column-container">{{ problem["difficulty"] }}</div>
+    </div>
+    {% endfor %}
+</div>
 {% endblock %}

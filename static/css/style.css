@@ -72,3 +72,40 @@ p {
     padding: 0.5em;
     background-color: grey;
 }
+
+.problem-list-column-names {
+    text-align: left;
+    display: grid;
+    grid-template-columns: 
+        minmax(0, 0.5fr) 
+        minmax(0, 1.5fr) 
+        minmax(0, 1fr) 
+        minmax(0, 0.75fr) 
+        minmax(0, 0.75fr);
+}
+
+.problem-list-column-container {
+    display: inline-block;
+    overflow-x: hidden;
+    max-width: 100%;
+}
+
+.problem-list-columns {
+    text-align: left;
+    display: grid;
+    grid-template-columns: 
+        minmax(0, 0.5fr) 
+        minmax(0, 1.5fr) 
+        minmax(0, 1fr) 
+        minmax(0, 0.75fr) 
+        minmax(0, 0.75fr);
+}
+
+.problem-list-row-gap {
+    height: 0.08em;
+}
+
+.problem-link {
+    display: inline-block;
+    text-decoration: underline;
+}
