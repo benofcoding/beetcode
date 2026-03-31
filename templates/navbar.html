@@ -1,9 +1,36 @@
 <div class="navbar">
-    <div>{{current_user.name}}</div>
-    {%if current_user.is_authenticated %}
-    <form action="/logout">
-        <button type="submit">logout</button>
-    </form>
-    {%endif%}
+    <div class="left-navbar navbar-section">
+        <a class="navbar-item" href="/">
+            Problems
+        </a>
+        <form
+        class="nav-bar-search-form"
+        action="/process_player_search"
+        method="POST"
+        >
+        <input
+            class="nav-bar-search"
+            name="searchs"
+            id="searchs"
+            placeholder="search users"
+        />
+        </form>
+    </div>
+
+    <div class="right-navbar navbar-section">
+        {% if is_authenticated %}
+        <div>
+            {{current_user.name}}
+        </div>
+        <form action="/logout">
+            <button class="navbar-item" type="submit">logout</button>
+        </form>
+        {% else %}
+        <a class="navbar-item" href="/login">
+            Login
+        </a>
+        {% endif %}
+    </div>
+
 </div>
 

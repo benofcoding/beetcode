@@ -1,3 +1,59 @@
+/* general tags */
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    font-family: 'Alfa Slab One', serif;
+    width: 100vw;
+    padding: 0;
+    margin: 0;
+    font-family: sans-serif;
+    background-color: #e7e7e7;
+    font-size: 1vw;
+    text-decoration-color: black;
+}
+
+a {
+    margin: 0;
+    padding: 0;
+    text-decoration: none;
+    color: black;
+}
+
+h1, h2, h3, h4, h5, h6 P{
+    margin: 0;
+    padding: 0;
+}
+
+h1 {
+    font-weight: normal;
+    font-family: 'Alfa Slab One';
+    font-size: 3em;
+}
+
+p {
+    padding: 0;
+    margin: 0;
+}
+
+hr {
+    width: 100%;
+    background-color: #333;
+    border: none;
+}
+
+button {
+    font-size: 1em;
+}
+
+/* main expands to take up all the space until 
+the footer reachs the bottom of the page */
+main {
+    flex: 1;
+}
+/* general tags end */
+
 body {
     min-height: 100vh;
     display: flex;
@@ -109,3 +165,61 @@ p {
     display: inline-block;
     text-decoration: underline;
 }
+
+/* Navbar */
+
+.navbar{
+    /* box shadow below navbar */
+    box-shadow: 0em 1em 0.75em rgba(0, 0, 0, 0.2);
+    width: 100vw;
+    display: flex;
+    /* pushes first half of nav bar to left 
+    and sench have of navbar to right */
+    justify-content: space-between;
+    align-items: center;
+    background-color: #ab91d0;
+    margin-bottom: 2.5vw;
+    height: 3em;
+}
+
+/* left and right section of navbar */
+.navbar-section{
+    height: 100%;
+    display: grid;
+    grid-template-columns: repeat(5, max-content);
+}
+
+.navbar-item {
+    font-weight: bold;
+    font-size: 1em;
+    background-color: #ab91d0;
+    border: none;
+    display: flex;
+    align-items: center;
+    padding: 0 1vw 0 1vw;
+    height: 100%;
+}
+
+.nav-bar-search-form {
+    padding: 0 1vw 0 1vw;
+    display: flex;
+    align-items: center;
+
+    
+}
+
+.nav-bar-search {
+    font-size: 1em;
+    max-width: 100%;
+    height: 25%;
+    padding: 0.5em;
+    background-color: #dbcbf1;
+    border: solid 0.2em black;
+    border-radius: 0.2em;
+}
+
+.navbar-item:hover {
+    background-color: #9A7CC3;
+}
+
+/* Navbar end */
