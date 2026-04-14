@@ -1,5 +1,21 @@
 {% extends "layout.html" %} {% block content %}
 <div class="problem-list">
+    <form class="problem-list-sort-form" method="POST" action="{{ url_for('problem_list') }}">
+        <label for="sort_by">{{ form.sort_by.label.text }}</label>
+        {{ form.sort_by(class_='form-control') }}
+
+        <label for="filter_type">{{ form.filter_type.label.text }}</label>
+        {{ form.filter_type(class_='form-control') }}
+
+        <label for="filter_difficulty">{{ form.filter_difficulty.label.text }}</label>
+        {{ form.filter_difficulty(class_='form-control') }}
+
+        <label for="order">{{ form.order.label.text }}</label>
+        {{ form.order(class_='form-control') }}
+
+        {{ form.submit(class_='button') }}
+    </form>
+
     <div class="problem-list-column-names">
         <div>#</div>
         <div>Name</div>

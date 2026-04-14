@@ -18,7 +18,7 @@
     </div>
 
     <div class="right-navbar navbar-section">
-        {% if is_authenticated %}
+        {% if current_user.is_authenticated %}
         <div>
             {{current_user.name}}
         </div>

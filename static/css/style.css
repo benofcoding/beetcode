@@ -129,6 +129,11 @@ p {
     background-color: grey;
 }
 
+.problem-list {
+    width: 33%;
+    justify-self: center;
+}
+
 .problem-list-column-names {
     text-align: left;
     display: grid;

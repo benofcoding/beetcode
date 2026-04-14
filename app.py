@@ -11,7 +11,7 @@ from sqlalchemy import (String,
                         create_engine,
                         JSON)
 from typing import List, Any, Dict
-from wtforms import StringField, SubmitField, PasswordField, validators, Form
+from wtforms import SelectField, StringField, SubmitField, PasswordField, validators, Form
 from wtforms.validators import DataRequired, InputRequired
 from flask_login import (UserMixin,
                          LoginManager,
@@ -112,7 +112,15 @@ engine = create_engine("sqlite:///instance/database.db")
 
 class LoginForm(Form):
     username = StringField("Name", validators=[validators.InputRequired()])
-    password = PasswordField('Password',validators=[validators.InputRequired()])
+    password = PasswordField('Password', validators=[validators.InputRequired()])
+
+
+class ProblemListForm(Form):
+    sort_by = SelectField('Sort by', choices=[('problem_id', 'ID'), ('name', 'Name'), ('type', 'Type'), ('difficulty', 'Difficulty')])
+    order = SelectField('Order', choices=[('asc', 'Ascending'), ('desc', 'Descending')])
+    filter_type = SelectField('Filter type', choices=[('all', 'All')])
+    filter_difficulty = SelectField('Filter difficulty', choices=[('all', 'All')])
+    submit = SubmitField('Apply')
 
 
 @login_manager.user_loader
@@ -167,16 +175,40 @@ def problem(problem_id):
 
 @app.route('/problem_list', methods=["GET", "POST"])
 def problem_list():
-    if request.method == "POST":
-        pass  # PAGE NMBER DO LATER
-
-    page_num = 0
-    query = select(Problem).order_by(Problem.problem_id).offset(page_num*100).limit(100)
     with Session(engine) as session:
-        temp_problems = session.scalars(query).all()
+        q = select(Problem.type).distinct().order_by(Problem.type)
+        problem_types = session.scalars(q).all()
+
+        q = select(Problem.difficulty).distinct().order_by(Problem.difficulty)
+        difficulties = session.scalars(q).all()
+
+        form = ProblemListForm(request.args)
+
+        form.filter_type.choices += [(t, t) for t in problem_types]
+        form.filter_difficulty.choices += [(d, d) for d in difficulties]
+
+        sort_by = form.sort_by.data or 'problem_id'
+        order = form.order.data or 'asc'
+        filter_type = form.filter_type.data or 'all'
+        filter_difficulty = form.filter_difficulty.data or 'all'
+
+        sort_columns = {'problem_id': Problem.problem_id, 'name': Problem.problem_name, 'type': Problem.type, 'difficulty': Problem.difficulty}
+        sort_column = sort_columns[sort_by]
+
+        q = select(Problem)
+        if filter_type != 'all':
+            q = q.where(Problem.type == filter_type)
+        if filter_difficulty != 'all':
+            q = q.where(Problem.difficulty == filter_difficulty)
+        if order == 'desc':
+            q = q.order_by(sort_column.desc())
+        else:
+            q = q.order_by(sort_column.asc())
+
+        temp_problems = session.scalars(q).all()
         problems = [{'problem_id': i.problem_id, 'name': i.problem_name, 'difficulty': i.difficulty, 'type': i.type} for i in temp_problems]
 
-    return render_template("problem_list.html", problems=problems)
+    return render_template("problem_list.html", problems=problems, form=form)
 
 
 @app.route('/run_code', methods=['POST'])
