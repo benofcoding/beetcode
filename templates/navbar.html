@@ -5,14 +5,14 @@
         </a>
         <form
         class="nav-bar-search-form"
-        action="/process_player_search"
+        action="/process_problem_search"
         method="POST"
         >
         <input
             class="nav-bar-search"
             name="searchs"
             id="searchs"
-            placeholder="search users"
+            placeholder="search problems"
         />
         </form>
     </div>
@@ -22,6 +22,11 @@
         <div>
             {{current_user.name}}
         </div>
+        {% if current_user.role == 'admin' %}
+        <a class="navbar-item" href="/add_problem">
+            Add Problem
+        </a>
+        {% endif %}
         <form action="/logout">
             <button class="navbar-item" type="submit">logout</button>
         </form>

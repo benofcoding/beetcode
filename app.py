@@ -123,6 +123,16 @@ class ProblemListForm(Form):
     submit = SubmitField('Apply')
 
 
+class AddProblemForm(Form):
+    problem_name = StringField('Problem Name', validators=[DataRequired()])
+    description = StringField('Description', validators=[DataRequired()])
+    function_name = StringField('Function Name', validators=[DataRequired()])
+    function_args = StringField('Function Arguments', validators=[DataRequired()])
+    type = StringField('Type', validators=[DataRequired()])
+    difficulty = SelectField('Difficulty', choices=[('Easy', 'Easy'), ('Medium', 'Medium'), ('Hard', 'Hard')])
+    submit = SubmitField('Add Problem')
+
+
 @login_manager.user_loader
 def load_user(user_id):
     query = select(User).where(User.user_id == user_id)
@@ -170,7 +180,7 @@ def problem(problem_id):
         q = select(Problem).where(Problem.problem_id == problem_id)
         problem = session.scalar(q)
 
-    return render_template('problem.html', problem_id=problem_id, function_name=problem.function_name, function_args=problem.function_args)
+    return render_template('problem.html', problem=problem)
 
 
 @app.route('/problem_list', methods=["GET", "POST"])
@@ -209,6 +219,46 @@ def problem_list():
         problems = [{'problem_id': i.problem_id, 'name': i.problem_name, 'difficulty': i.difficulty, 'type': i.type} for i in temp_problems]
 
     return render_template("problem_list.html", problems=problems, form=form)
+
+
+@app.route('/add_problem', methods=['GET', 'POST'])
+@login_required
+def add_problem():
+    if current_user.role != 'admin':
+        return redirect(url_for('problem_list'))
+    
+    if request.method == 'POST':
+        problem_name = request.form.get('problem_name')
+        description = request.form.get('description')
+        type_ = request.form.get('type')
+        difficulty = request.form.get('difficulty')
+        default_code = request.form.get('default_code')
+
+        default_code = default_code.removeprefix("def ").removesuffix(":")
+
+        function_name, function_args = default_code.split("(", 1)
+        function_args = "(" + function_args
+                
+        with Session(engine) as session:
+            new_problem = Problem(problem_name=problem_name, description=description, function_name=function_name, function_args=function_args, type=type_, difficulty=difficulty)
+            session.add(new_problem)
+            session.flush()
+            
+            test_num = 1
+            while True:
+                test_input = request.form.get(f'test_input_{test_num}')
+                print(test_input)
+                expected_output = request.form.get(f'expected_output_{test_num}')
+                test_type = request.form.get(f'test_type_{test_num}')
+                    
+                test_data = json.loads(test_input)
+
+                new_test = Test(test=test_data, type=test_type, problem_id=new_problem.problem_id, test_num=test_num, result=expected_output)
+                session.add(new_test)
+                test_num += 1
+            session.commit()
+        return redirect(url_for('problem_list'))
+    return render_template('add_problem.html')
 
 
 @app.route('/run_code', methods=['POST'])

@@ -8,7 +8,7 @@
 </head>
 <body>
     <div class="main-container">
-        <div class="problem-description">DESCRIPTION GOES HERE</div>
+        <div class="problem-description">{{ problem.description }}</div>
         <div class="editor-submit-parent">
             <div id="editor" class="editor"></div>
             <button onclick="run_code()">▶ Run Code</button>
@@ -23,7 +23,7 @@
     require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
     require(['vs/editor/editor.main'], function() {
         editor = monaco.editor.create(document.getElementById("editor"), {
-            value: "def {{ function_name }}{{ function_args }}:",
+            value: `hi`,
             language: "python",
             theme: "vs-dark",
             automaticLayout: true
@@ -34,7 +34,7 @@
         const response = await fetch('/run_code', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 'code': editor.getValue(), 'problem_id': "{{problem_id}}" })
+            body: JSON.stringify({ 'code': editor.getValue(), 'problem_id': {{ problem.problem_id }} })
         });
 
         data = await response.json();
