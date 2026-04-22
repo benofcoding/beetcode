@@ -115,6 +115,12 @@ class LoginForm(Form):
     password = PasswordField('Password', validators=[validators.InputRequired()])
 
 
+class SignupForm(Form):
+    username = StringField("Name", validators=[validators.InputRequired()])
+    password = PasswordField('Password', validators=[validators.InputRequired()])
+    password_confirm = PasswordField('Password_confirm', validators=[validators.InputRequired()])
+
+
 class ProblemListForm(Form):
     sort_by = SelectField('Sort by', choices=[('problem_id', 'ID'), ('name', 'Name'), ('type', 'Type'), ('difficulty', 'Difficulty')])
     order = SelectField('Order', choices=[('asc', 'Ascending'), ('desc', 'Descending')])
@@ -166,6 +172,23 @@ def login():
         return redirect(url_for("problem_list"))
     return render_template("login.html", form=form)
 
+
+@app.route('/signup', methods=["GET", "POST"])
+def signup():
+    form = SignupForm(request.form)
+    if request.method == "POST":
+        if not form.password.data == form.password_confirm.data:
+            return render_template("signup.html")
+        h = sha256()
+        h.update(form.password.data.encode())
+        password_hash = h.hexdigest()
+        with Session(engine) as session:
+            new_user = User(name=form.username.data, role='normal', hash=password_hash)
+            session.add(new_user)
+            session.commit()
+            login_user(new_user)
+        return redirect(url_for("problem_list"))
+    return render_template("signup.html", form=form)
 
 @app.route("/logout")
 @login_required
