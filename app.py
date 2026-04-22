@@ -11,8 +11,9 @@ from sqlalchemy import (String,
                         create_engine,
                         JSON)
 from typing import List, Any, Dict
-from wtforms import SelectField, StringField, SubmitField, PasswordField, validators, Form
-from wtforms.validators import DataRequired, InputRequired
+from wtforms import (SelectField, StringField, SubmitField,
+                     PasswordField, validators, Form)
+from wtforms.validators import DataRequired
 from flask_login import (UserMixin,
                          LoginManager,
                          login_user,
@@ -30,6 +31,8 @@ app.config["SECRET_KEY"] = "a-very-secret-secret-key"
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
+db = SQLAlchemy()
+
 
 class Base(DeclarativeBase):
     pass
@@ -42,7 +45,9 @@ class User(Base, UserMixin):
     role: Mapped[str] = mapped_column(String)
     hash: Mapped[str] = mapped_column(String)
 
-    user_problems: Mapped[list["User_Problem"]] = relationship("User_Problem", back_populates="user")
+    user_problems: Mapped[list["User_Problem"]] = \
+        relationship("User_Problem", back_populates="user")
+
     @property
     def id(self):
         return self.user_id
@@ -56,7 +61,8 @@ class User_Problem(Base):
     solution: Mapped[str] = mapped_column(String)
     status: Mapped[str] = mapped_column(String)
 
-    problem: Mapped["Problem"] = relationship("Problem", back_populates="user_problems")
+    problem: Mapped["Problem"] = \
+        relationship("Problem", back_populates="user_problems")
     user: Mapped["User"] = relationship("User", back_populates="user_problems")
 
 
@@ -70,11 +76,14 @@ class Problem(Base):
     problem_name: Mapped[str] = mapped_column(String)
     difficulty: Mapped[str] = mapped_column(String)
 
-    user_problems: Mapped[list["User_Problem"]] = relationship("User_Problem", back_populates="problem")
+    user_problems: Mapped[list["User_Problem"]] = \
+        relationship("User_Problem", back_populates="problem")
 
-    tests: Mapped[List["Test"]] = relationship("Test", back_populates="problem")
+    tests: Mapped[List["Test"]] = \
+        relationship("Test", back_populates="problem")
 
-    problem_tags: Mapped[List["Problem_Tag"]] = relationship("Problem_Tag", back_populates="problem")
+    problem_tags: Mapped[List["Problem_Tag"]] = \
+        relationship("Problem_Tag", back_populates="problem")
 
 
 class Test(Base):
@@ -86,7 +95,8 @@ class Test(Base):
     test_num: Mapped[int]
     result: Mapped[str] = mapped_column(String)
 
-    problem: Mapped["Problem"] = relationship("Problem", back_populates="tests")
+    problem: Mapped["Problem"] = \
+        relationship("Problem", back_populates="tests")
 
 
 class Problem_Tag(Base):
@@ -95,7 +105,8 @@ class Problem_Tag(Base):
     problem_id: Mapped[int] = mapped_column(ForeignKey("Problem.problem_id"))
     tag_id: Mapped[int] = mapped_column(ForeignKey("Tag.tag_id"))
 
-    problem: Mapped["Problem"] = relationship("Problem", back_populates="problem_tags")
+    problem: Mapped["Problem"] = \
+        relationship("Problem", back_populates="problem_tags")
     tag: Mapped["Tag"] = relationship("Tag", back_populates="problem_tags")
 
 
@@ -104,7 +115,8 @@ class Tag(Base):
     tag_id: Mapped[int] = mapped_column(primary_key=True)
     tag: Mapped[str] = mapped_column(String)
 
-    problem_tags: Mapped[List["Problem_Tag"]] = relationship("Problem_Tag", back_populates="tag")
+    problem_tags: Mapped[List["Problem_Tag"]] = \
+        relationship("Problem_Tag", back_populates="tag")
 
 
 engine = create_engine("sqlite:///instance/database.db")
@@ -112,20 +124,31 @@ engine = create_engine("sqlite:///instance/database.db")
 
 class LoginForm(Form):
     username = StringField("Name", validators=[validators.InputRequired()])
-    password = PasswordField('Password', validators=[validators.InputRequired()])
+    password = PasswordField('Password',
+                             validators=[validators.InputRequired()])
 
 
 class SignupForm(Form):
     username = StringField("Name", validators=[validators.InputRequired()])
-    password = PasswordField('Password', validators=[validators.InputRequired()])
-    password_confirm = PasswordField('Password_confirm', validators=[validators.InputRequired()])
+    password = PasswordField('Password',
+                             validators=[validators.InputRequired()])
+    password_confirm = \
+        PasswordField('Password_confirm',
+                      validators=[validators.InputRequired()])
 
 
 class ProblemListForm(Form):
-    sort_by = SelectField('Sort by', choices=[('problem_id', 'ID'), ('name', 'Name'), ('type', 'Type'), ('difficulty', 'Difficulty')])
-    order = SelectField('Order', choices=[('asc', 'Ascending'), ('desc', 'Descending')])
+    sort_by = SelectField('Sort by', choices=[('problem_id', 'ID'),
+                                              ('name', 'Name'),
+                                              ('type', 'Type'),
+                                              ('difficulty', 'Difficulty')])
+
+    order = SelectField('Order', choices=[('asc', 'Ascending'),
+                                          ('desc', 'Descending')])
+
     filter_type = SelectField('Filter type', choices=[('all', 'All')])
-    filter_difficulty = SelectField('Filter difficulty', choices=[('all', 'All')])
+    filter_difficulty = SelectField('Filter difficulty',
+                                    choices=[('all', 'All')])
     submit = SubmitField('Apply')
 
 
@@ -133,9 +156,12 @@ class AddProblemForm(Form):
     problem_name = StringField('Problem Name', validators=[DataRequired()])
     description = StringField('Description', validators=[DataRequired()])
     function_name = StringField('Function Name', validators=[DataRequired()])
-    function_args = StringField('Function Arguments', validators=[DataRequired()])
+    function_args = StringField('Function Arguments',
+                                validators=[DataRequired()])
     type = StringField('Type', validators=[DataRequired()])
-    difficulty = SelectField('Difficulty', choices=[('Easy', 'Easy'), ('Medium', 'Medium'), ('Hard', 'Hard')])
+    difficulty = SelectField('Difficulty', choices=[('Easy', 'Easy'),
+                                                    ('Medium', 'Medium'),
+                                                    ('Hard', 'Hard')])
     submit = SubmitField('Add Problem')
 
 
@@ -167,7 +193,7 @@ def login():
 
         if hash != user.hash:
             return render_template("login.html", form=form)
-        
+
         login_user(user)
         return redirect(url_for("problem_list"))
     return render_template("login.html", form=form)
@@ -183,12 +209,16 @@ def signup():
         h.update(form.password.data.encode())
         password_hash = h.hexdigest()
         with Session(engine) as session:
-            new_user = User(name=form.username.data, role='normal', hash=password_hash)
+            new_user = User(name=form.username.data,
+                            role='normal',
+                            hash=password_hash)
+
             session.add(new_user)
             session.commit()
             login_user(new_user)
         return redirect(url_for("problem_list"))
     return render_template("signup.html", form=form)
+
 
 @app.route("/logout")
 @login_required
@@ -205,7 +235,9 @@ def problem(problem_id):
         default_text = f"def {problem.function_name}{problem.function_args}:"
         print(default_text)
 
-    return render_template('problem.html', problem=problem, default_text=default_text)
+    return render_template('problem.html',
+                           problem=problem,
+                           default_text=default_text)
 
 
 @app.route('/problem_list', methods=["GET", "POST"])
@@ -226,7 +258,9 @@ def problem_list():
         filter_type = form.filter_type.data or 'all'
         filter_difficulty = form.filter_difficulty.data or 'all'
 
-        sort_columns = {'problem_id': Problem.problem_id, 'name': Problem.problem_name, 'type': Problem.type, 'difficulty': Problem.difficulty}
+        sort_columns = {'problem_id': Problem.problem_id,
+                        'name': Problem.problem_name,
+                        'type': Problem.type, 'difficulty': Problem.difficulty}
         sort_column = sort_columns[sort_by]
 
         q = select(Problem)
@@ -242,7 +276,10 @@ def problem_list():
         print(q)
         temp_problems = session.scalars(q).all()
         print(temp_problems)
-        problems = [{'problem_id': i.problem_id, 'name': i.problem_name, 'difficulty': i.difficulty, 'type': i.type} for i in temp_problems]
+        problems = [{'problem_id': i.problem_id,
+                     'name': i.problem_name,
+                     'difficulty': i.difficulty,
+                     'type': i.type} for i in temp_problems]
 
     return render_template("problem_list.html", problems=problems, form=form)
 
@@ -252,7 +289,7 @@ def problem_list():
 def add_problem():
     if current_user.role != 'admin':
         return redirect(url_for('problem_list'))
-    
+
     if request.method == 'POST':
         problem_name = request.form.get('problem_name')
         description = request.form.get('description')
@@ -264,22 +301,30 @@ def add_problem():
 
         function_name, function_args = default_code.split("(", 1)
         function_args = "(" + function_args
-                
+
         with Session(engine) as session:
-            new_problem = Problem(problem_name=problem_name, description=description, function_name=function_name, function_args=function_args, type=type_, difficulty=difficulty)
+            new_problem = Problem(problem_name=problem_name,
+                                  description=description,
+                                  function_name=function_name,
+                                  function_args=function_args,
+                                  type=type_, difficulty=difficulty)
+
             session.add(new_problem)
             session.flush()
-            
+
             test_num = 1
             while True:
                 test_input = request.form.get(f'test_input_{test_num}')
                 print(test_input)
-                expected_output = request.form.get(f'expected_output_{test_num}')
+                expected_output = \
+                    request.form.get(f'expected_output_{test_num}')
                 test_type = request.form.get(f'test_type_{test_num}')
-                    
+
                 test_data = json.loads(test_input)
 
-                new_test = Test(test=test_data, type=test_type, problem_id=new_problem.problem_id, test_num=test_num, result=expected_output)
+                new_test = Test(test=test_data, type=test_type,
+                                problem_id=new_problem.problem_id,
+                                test_num=test_num, result=expected_output)
                 session.add(new_test)
                 test_num += 1
             session.commit()
@@ -314,7 +359,6 @@ def run_code():
     """
 
     wrapper = wrapper.replace('\n    ', '\n')
-    results = []
 
     return_dictionary = {}
 
@@ -346,8 +390,11 @@ def run_code():
             else:
                 status = 'fail'
 
-        return_dictionary[test.test_id] = {'output': output_lines, 'error': result.stderr, 'status': status, 'type': test.type,
-                                           'testcase': (test.test, test.result), 'returned_output': returned_output}
+        return_dictionary[test.test_id] = \
+            {'output': output_lines, 'error': result.stderr,
+             'status': status, 'type': test.type,
+             'testcase': (test.test, test.result),
+             'returned_output': returned_output}
 
     return jsonify(return_dictionary)
 
