@@ -179,8 +179,10 @@ def problem(problem_id):
     with Session(engine) as session:
         q = select(Problem).where(Problem.problem_id == problem_id)
         problem = session.scalar(q)
+        default_text = f"def {problem.function_name}{problem.function_args}:"
+        print(default_text)
 
-    return render_template('problem.html', problem=problem)
+    return render_template('problem.html', problem=problem, default_text=default_text)
 
 
 @app.route('/problem_list', methods=["GET", "POST"])
@@ -193,7 +195,6 @@ def problem_list():
         difficulties = session.scalars(q).all()
 
         form = ProblemListForm(request.args)
-
         form.filter_type.choices += [(t, t) for t in problem_types]
         form.filter_difficulty.choices += [(d, d) for d in difficulties]
 
@@ -215,7 +216,9 @@ def problem_list():
         else:
             q = q.order_by(sort_column.asc())
 
+        print(q)
         temp_problems = session.scalars(q).all()
+        print(temp_problems)
         problems = [{'problem_id': i.problem_id, 'name': i.problem_name, 'difficulty': i.difficulty, 'type': i.type} for i in temp_problems]
 
     return render_template("problem_list.html", problems=problems, form=form)

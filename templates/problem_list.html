@@ -1,6 +1,6 @@
 {% extends "layout.html" %} {% block content %}
 <div class="problem-list">
-    <form class="problem-list-sort-form" method="POST" action="{{ url_for('problem_list') }}">
+    <form class="problem-list-sort-form" method="GET" action="{{ url_for('problem_list') }}">
         <label for="sort_by">{{ form.sort_by.label.text }}</label>
         {{ form.sort_by(class_='form-control') }}
 
