@@ -1,4 +1,9 @@
-from flask import Flask, render_template, redirect, request, jsonify, url_for
+from flask import (Flask,
+                   render_template,
+                   redirect,
+                   request,
+                   jsonify,
+                   url_for)
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import (DeclarativeBase,
                             Mapped,
@@ -11,8 +16,12 @@ from sqlalchemy import (String,
                         create_engine,
                         JSON)
 from typing import List, Any, Dict
-from wtforms import (SelectField, StringField, SubmitField,
-                     PasswordField, validators, Form)
+from wtforms import (SelectField,
+                     StringField,
+                     SubmitField,
+                     PasswordField,
+                     validators,
+                     Form)
 from wtforms.validators import DataRequired
 from flask_login import (UserMixin,
                          LoginManager,
@@ -175,7 +184,7 @@ def load_user(user_id):
 
 @app.route("/")
 def home():
-    return redirect(url_for("problem_list"))
+    return redirect(url_for("login"))
 
 
 @app.route('/login', methods=["GET", 'POST'])
@@ -185,13 +194,13 @@ def login():
         with Session(engine) as session:
             query = select(User).where(User.name == form.username.data)
             user = session.scalar(query)
+        print(user)
 
         h = sha256()
         h.update(form.password.data.encode())
-        hash = h.hexdigest()
-        print(hash)
+        user_hash = h.hexdigest()
 
-        if hash != user.hash:
+        if user == None or user_hash != user.hash:
             return render_template("login.html", form=form)
 
         login_user(user)
@@ -227,11 +236,15 @@ def logout():
     return redirect(url_for('login'))
 
 
-@app.route("/problem/<int:problem_id>")
+@app.route("/problem/<problem_id>")
+@login_required
 def problem(problem_id):
     with Session(engine) as session:
         q = select(Problem).where(Problem.problem_id == problem_id)
         problem = session.scalar(q)
+        print(problem)
+        if problem == None:
+            return redirect(url_for('problem_list'))
         default_text = f"def {problem.function_name}{problem.function_args}:"
         print(default_text)
 
@@ -241,6 +254,7 @@ def problem(problem_id):
 
 
 @app.route('/problem_list', methods=["GET", "POST"])
+@login_required
 def problem_list():
     with Session(engine) as session:
         q = select(Problem.type).distinct().order_by(Problem.type)
@@ -254,6 +268,7 @@ def problem_list():
         form.filter_difficulty.choices += [(d, d) for d in difficulties]
 
         sort_by = form.sort_by.data or 'problem_id'
+        print(sort_by)
         order = form.order.data or 'asc'
         filter_type = form.filter_type.data or 'all'
         filter_difficulty = form.filter_difficulty.data or 'all'

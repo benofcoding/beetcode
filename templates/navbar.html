@@ -19,7 +19,7 @@
 
     <div class="right-navbar navbar-section">
         {% if current_user.is_authenticated %}
-        <div>
+        <div class="static-navbar-item">
             {{current_user.name}}
         </div>
         {% if current_user.role == 'admin' %}

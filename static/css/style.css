@@ -205,6 +205,17 @@ p {
     height: 100%;
 }
 
+.static-navbar-item {
+    font-weight: bold;
+    font-size: 1em;
+    background-color: #ab91d0;
+    border: none;
+    display: flex;
+    align-items: center;
+    padding: 0 1vw 0 1vw;
+    height: 100%;
+}
+
 .nav-bar-search-form {
     padding: 0 1vw 0 1vw;
     display: flex;
