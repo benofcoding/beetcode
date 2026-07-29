@@ -184,7 +184,7 @@ def load_user(user_id):
 
 @app.route("/")
 def home():
-    return redirect(url_for("login"))
+    return redirect(url_for("problem_list"))
 
 
 @app.route('/login', methods=["GET", 'POST'])
@@ -213,7 +213,7 @@ def signup():
     form = SignupForm(request.form)
     if request.method == "POST":
         if not form.password.data == form.password_confirm.data:
-            return render_template("signup.html")
+            return render_template("signup.html", form=form)
         h = sha256()
         h.update(form.password.data.encode())
         password_hash = h.hexdigest()
@@ -268,7 +268,6 @@ def problem_list():
         form.filter_difficulty.choices += [(d, d) for d in difficulties]
 
         sort_by = form.sort_by.data or 'problem_id'
-        print(sort_by)
         order = form.order.data or 'asc'
         filter_type = form.filter_type.data or 'all'
         filter_difficulty = form.filter_difficulty.data or 'all'
@@ -284,9 +283,9 @@ def problem_list():
         if filter_difficulty != 'all':
             q = q.where(Problem.difficulty == filter_difficulty)
         if order == 'desc':
-            q = q.order_by(sort_column.desc())
+            q = q.order_by(sort_column.collate("NOCASE").desc())
         else:
-            q = q.order_by(sort_column.asc())
+            q = q.order_by(sort_column.collate("NOCASE").asc())
 
         print(q)
         temp_problems = session.scalars(q).all()

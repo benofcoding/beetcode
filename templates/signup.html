@@ -5,7 +5,9 @@
         {{form.username()}}
         {{form.password.label}}
         {{form.password()}}
-        <button type="submit">Sign in</button>
+        {{form.password_confirm.label}}
+        {{form.password_confirm()}}
+        <button type="submit">Sign up</button>
     </div>
 </form>
 {% endblock %}
