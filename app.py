@@ -495,13 +495,32 @@ def submit_code():
 
     if return_dictionary['testcase_info']['passed'] != total_tests:
         return_dictionary['submit_info']['passed'] = False
+        with Session(engine) as session:
+            q = select(User_Problem).where(User_Problem.problem_id == problem.problem_id and User_Problem.user_id == current_user.id)
+            user_problem = session.scalar(q)
+            if user_problem:
+                user_problem.solution = code
+                session.commit()
+            else:
+                new_user_problem = User_Problem(user_id = current_user.id, problem_id = problem.problem_id,
+                                    solution = code, status = 'attempted')
+                session.add(new_user_problem)
+                session.commit()
+
     else:
         return_dictionary['submit_info']['passed'] = True
         with Session(engine) as session:
-            new_user_problem = User_Problem(user_id = current_user.id, problem_id = problem.problem_id,
-                                solution = code, status = 'completed')
-            session.add(new_user_problem)
-            session.commit()
+            q = select(User_Problem).where(User_Problem.problem_id == problem.problem_id and User_Problem.user_id == current_user.id)
+            user_problem = session.scalar(q)
+            if user_problem:
+                user_problem.status = 'completed'
+                user_problem.solution = code
+                session.commit()
+            else:
+                new_user_problem = User_Problem(user_id = current_user.id, problem_id = problem.problem_id,
+                                    solution = code, status = 'completed')
+                session.add(new_user_problem)
+                session.commit()
 
 
 
