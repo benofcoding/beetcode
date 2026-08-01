@@ -47,6 +47,16 @@ button {
     font-size: 1em;
 }
 
+.form-errors {
+    margin: 0 0 1em;
+    padding-left: 1.25em;
+    color: #ff0000;
+}
+
+.field-error {
+    color: #ff0000;
+    margin-bottom: 0.5em;
+}
 
 main {
     flex: 1;

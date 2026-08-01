@@ -132,18 +132,27 @@ engine = create_engine("sqlite:///instance/database.db")
 
 
 class LoginForm(Form):
-    username = StringField("Name", validators=[validators.InputRequired()])
-    password = PasswordField('Password',
-                             validators=[validators.InputRequired()])
+    username = StringField(
+        "Name",
+        validators=[validators.InputRequired(message="Username is required")]
+    )
+    password = PasswordField(
+        'Password',
+        validators=[validators.InputRequired(message="Password is required")]
+    )
 
 
 class SignupForm(Form):
-    username = StringField("Name", validators=[validators.InputRequired()])
+    username = StringField(
+        "Name",
+        validators=[validators.InputRequired(message="Username is required"),
+                    validators.Length(min=3, max=20,
+                        message="Username must be between 3 and 20 characters")])
     password = PasswordField('Password',
-                             validators=[validators.InputRequired()])
-    password_confirm = \
-        PasswordField('Password_confirm',
-                      validators=[validators.InputRequired()])
+        validators=[validators.InputRequired(message="Password is required")])
+    password_confirm = PasswordField('Password_confirm', validators=[
+            validators.InputRequired(message="Password confirmation is required"),
+            validators.EqualTo('password', message='Passwords must match')])
 
 
 class ProblemListForm(Form):
@@ -191,16 +200,19 @@ def home():
 def login():
     form = LoginForm(request.form)
     if request.method == "POST":
+        if not form.validate():
+            return render_template("login.html", form=form)
+
         with Session(engine) as session:
             query = select(User).where(User.name == form.username.data)
             user = session.scalar(query)
-        print(user)
 
         h = sha256()
         h.update(form.password.data.encode())
         user_hash = h.hexdigest()
 
-        if user == None or user_hash != user.hash:
+        if user is None or user_hash != user.hash:
+            form.password.errors.append("Username or password failed")
             return render_template("login.html", form=form)
 
         login_user(user)
@@ -212,12 +224,20 @@ def login():
 def signup():
     form = SignupForm(request.form)
     if request.method == "POST":
-        if not form.password.data == form.password_confirm.data:
+        if not form.validate():
             return render_template("signup.html", form=form)
-        h = sha256()
-        h.update(form.password.data.encode())
-        password_hash = h.hexdigest()
+
         with Session(engine) as session:
+            query = select(User).where(User.name == form.username.data)
+            existing_user = session.scalar(query)
+            if existing_user is not None:
+                form.username.errors.append("Username is already in use")
+                return render_template("signup.html", form=form)
+
+            h = sha256()
+            h.update(form.password.data.encode())
+            password_hash = h.hexdigest()
+
             new_user = User(name=form.username.data,
                             role='normal',
                             hash=password_hash)
