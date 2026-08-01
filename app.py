@@ -254,12 +254,26 @@ def problem(problem_id):
         total_tests = len(tests)
         public_tests = len([t for t in tests if t.type == "public"])
 
+        print(current_user.id)
+
+        q = select(User_Problem).where(User_Problem.problem_id == problem.problem_id, User_Problem.user_id == current_user.id)
+        user_problem = session.scalar(q)
+
+        print(user_problem)
+
+        code = ''
+        if user_problem:
+            code = user_problem.solution
+            code = code.partition('\n')[2]
+
+        print(code)
 
     return render_template('problem.html',
                            problem=problem,
                            default_text=default_text,
                            total_tests=total_tests,
-                           public_tests=public_tests)
+                           public_tests=public_tests,
+                           code=code)
 
 
 @app.route('/problem_list', methods=["GET", "POST"])
@@ -431,7 +445,7 @@ def submit_code():
 
     data = request.get_json()
     code = data['code']
-    code = code.replace('\n', '\n    ')
+    print(code)
     problem_id = data['problem_id']
 
     with Session(engine) as session:
@@ -441,18 +455,18 @@ def submit_code():
         total_tests = len(tests)
 
     wrapper = f"""
-    import json, sys
-    data = json.loads(sys.stdin.read())
+import json, sys
+data = json.loads(sys.stdin.read())
 
-    {code}
+{code}
 
-    result = {problem.function_name}(**data)
+result = {problem.function_name}(**data)
 
-    if result is not None:
-        print('__RETURN__',  result)
+if result is not None:
+    print('__RETURN__',  result)
     """
 
-    wrapper = wrapper.replace('\n    ', '\n')
+    print(wrapper)
 
     return_dictionary = {'testcase_info':{'testcases':{}, 'passed':0},
                          'submit_info':{}}
@@ -494,9 +508,9 @@ def submit_code():
 
 
     if return_dictionary['testcase_info']['passed'] != total_tests:
-        return_dictionary['submit_info']['passed'] = False
+        return_dictionary['submit_info']['passed'] = 'Falied'
         with Session(engine) as session:
-            q = select(User_Problem).where(User_Problem.problem_id == problem.problem_id and User_Problem.user_id == current_user.id)
+            q = select(User_Problem).where(User_Problem.problem_id == problem.problem_id, User_Problem.user_id == current_user.id)
             user_problem = session.scalar(q)
             if user_problem:
                 user_problem.solution = code
@@ -508,9 +522,9 @@ def submit_code():
                 session.commit()
 
     else:
-        return_dictionary['submit_info']['passed'] = True
+        return_dictionary['submit_info']['passed'] = 'Passed'
         with Session(engine) as session:
-            q = select(User_Problem).where(User_Problem.problem_id == problem.problem_id and User_Problem.user_id == current_user.id)
+            q = select(User_Problem).where(User_Problem.problem_id == problem.problem_id, User_Problem.user_id == current_user.id)
             user_problem = session.scalar(q)
             if user_problem:
                 user_problem.status = 'completed'

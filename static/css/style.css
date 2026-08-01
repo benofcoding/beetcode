@@ -1,7 +1,7 @@
 /* general tags */
 
 body {
-    min-height: 100vh;
+    height: 100vh;
     display: flex;
     flex-direction: column;
     font-family: 'Alfa Slab One', serif;
@@ -52,6 +52,7 @@ main {
     flex: 1;
     flex-direction: column;
     display: flex;
+    min-height: 0;
 }
 
 body {
@@ -91,12 +92,15 @@ p {
     flex: 1;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
+    height: 100%;
+    min-height: 0;
 }
 
 .editor {
     flex: 1;
-    height: 100%;
+    min-height: 0;
     width: 100%;
+    overflow: hidden; /* Prevents Monaco canvas from spilling out */
 }
 
 .editor-submit-parent {
@@ -147,7 +151,7 @@ p {
 
 .problem-list {
     width: 33%;
-    justify-self: center;
+    align-self: center;
 }
 
 .problem-list-column-names {
