@@ -9,11 +9,12 @@
 <body>
     <div class="main-container">
         <div class="problem-description">{{ problem.description }}</div>
-        <div class="editor-submit-parent">
+        <div id="editor-submit-parent" class="editor-submit-parent">
             <div id="editor" class="editor"></div>
-            <button onclick="run_code()">▶ Run Code</button>
-            <button onclick="submit_code()">Submit Code</button>
-
+            <div class="run-submit-buttons">
+                <button class="run-submit-button" onclick="run_code()">▶ Run Code</button>
+                <button class="run-submit-button" onclick="submit_code()">Submit Code</button>
+            </div>
         </div>
         <div id="testcases" class="testcases">
             <div id="testcase-button-container" class="testcase-button-container"></div>
@@ -64,10 +65,15 @@
 
         const testcase_button_container = document.getElementById("testcase-button-container")
         const testcase_container = document.getElementById("testcase-container");
+        const submit_outcome_div = document.getElementById("submit-outcome-div")
+        if (submit_outcome_div) {
+            submit_outcome_div.remove()
+        }
         testcase_button_container.replaceChildren();
         testcase_container.replaceChildren()
 
         format_testcases(data['testcase_info'], {{total_tests}});
+        submit_outcom(data['submit_info'])
     }
 
     function format_testcases(data, test_count) {
@@ -178,6 +184,17 @@
         const special_testcase = document.getElementById("public_testcase_" + testcase_id);
         special_testcase.style.display = 'block';
     }   
+
+    function submit_outcom(outcome) {
+        const submit_outcome_div = document.createElement("div")
+        const editor_submit_parent = document.getElementById("editor-submit-parent")
+
+        submit_outcome_div.id = 'submit-outcome-div'
+        submit_outcome_div.style.padding = '1em';
+        submit_outcome_div.textContent = `${outcome['passed']}`;
+
+        editor_submit_parent.appendChild(submit_outcome_div)
+    }
 </script>
 </body>
 </html>
