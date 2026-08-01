@@ -438,6 +438,7 @@ def submit_code():
         q = select(Problem).where(Problem.problem_id == problem_id)
         problem = session.scalar(q)
         tests = problem.tests
+        total_tests = len(tests)
 
     wrapper = f"""
     import json, sys
@@ -490,6 +491,19 @@ def submit_code():
              'status': status, 'type': test.type,
              'testcase': (test.test, test.result),
              'returned_output': returned_output}
+
+
+    if return_dictionary['testcase_info']['passed'] != total_tests:
+        return_dictionary['submit_info']['passed'] = False
+    else:
+        return_dictionary['submit_info']['passed'] = True
+        with Session(engine) as session:
+            new_user_problem = User_Problem(user_id = current_user.id, problem_id = problem.problem_id,
+                                solution = code, status = 'completed')
+            session.add(new_user_problem)
+            session.commit()
+
+
 
     return jsonify(return_dictionary)
 
