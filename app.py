@@ -425,5 +425,73 @@ def run_code():
     return jsonify(return_dictionary)
 
 
+@app.route('/submit_code', methods=['POST'])
+def submit_code():
+    print_limit = 1000
+
+    data = request.get_json()
+    code = data['code']
+    code = code.replace('\n', '\n    ')
+    problem_id = data['problem_id']
+
+    with Session(engine) as session:
+        q = select(Problem).where(Problem.problem_id == problem_id)
+        problem = session.scalar(q)
+        tests = problem.tests
+
+    wrapper = f"""
+    import json, sys
+    data = json.loads(sys.stdin.read())
+
+    {code}
+
+    result = {problem.function_name}(**data)
+
+    if result is not None:
+        print('__RETURN__',  result)
+    """
+
+    wrapper = wrapper.replace('\n    ', '\n')
+
+    return_dictionary = {'testcase_info':{'testcases':{}, 'passed':0},
+                         'submit_info':{}}
+
+    for test in tests:
+        returned = False
+        testcase = test.test
+        result = subprocess.run(
+            [sys.executable, "-c", wrapper],
+            input=json.dumps(testcase),
+            capture_output=True, text=True, timeout=5
+        )
+
+        returned_output = None
+
+        output_lines = list(result.stdout.splitlines())
+        if len(output_lines) <= print_limit:
+            for index, line in enumerate(output_lines):
+                if '__RETURN__' in line:
+                    returned_output = line.removeprefix("__RETURN__ ")
+                    returned = True
+                    returned_index = index
+
+        status = 'not returned'
+
+        if returned:
+            del output_lines[returned_index]
+            if returned_output == test.result:
+                return_dictionary['testcase_info']['passed'] += 1
+                status = 'pass'
+            else:
+                status = 'fail'
+
+        return_dictionary['testcase_info']['testcases'][test.test_id] = \
+            {'output': output_lines, 'error': result.stderr,
+             'status': status, 'type': test.type,
+             'testcase': (test.test, test.result),
+             'returned_output': returned_output}
+
+    return jsonify(return_dictionary)
+
 if __name__ == "__main__":
     app.run(debug=True)
