@@ -43,11 +43,8 @@
 
         const testcase_button_container = document.getElementById("testcase-button-container")
         const testcase_container = document.getElementById("testcase-container");
-        while (testcase_container.firstChild) {
-            testcase_container.children[0].remove();
-            testcase_button_container.children[0].remove();
-
-        }
+        testcase_button_container.replaceChildren();
+        testcase_container.replaceChildren()
 
         format_testcases(data);
     }
@@ -55,8 +52,8 @@
     function format_testcases(data) {
         const public_tests = [];
 
-        for (testcase in data) {
-            if (data[testcase].type == 'public') {
+        for (testcase in data['testcases']) {
+            if (data['testcases'][testcase].type == 'public') {
                 public_tests.push(testcase);
             }
         }
@@ -98,9 +95,9 @@
             testcase_user_output.className = "testcase-output-field testcase-user-output"
             testcase_correct_output.className = "testcase-output-field testcase-correct-output"
 
-            testcase_user_stdout.textContent = data[testcase].output;
-            testcase_user_output.textContent = data[testcase].returned_output;
-            testcase_correct_output.textContent = data[testcase].testcase[1]
+            testcase_user_stdout.textContent = data['testcases'][testcase].output;
+            testcase_user_output.textContent = data['testcases'][testcase].returned_output;
+            testcase_correct_output.textContent = data['testcases'][testcase].testcase[1]
 
             testcase_button.onclick = () => show_testcase((index+1));
             testcase_button.textContent = "Test #" + (index+1);
@@ -109,9 +106,9 @@
             testcase_variables_container.className = "testcase-output-field"
             current_testcase.appendChild(testcase_variables_container)
 
-            for (const variable in data[testcase].testcase[0]) {
+            for (const variable in data['testcases'][testcase].testcase[0]) {
                 const testcase_value = document.createElement("div");
-                testcase_value.textContent = variable + " = " + data[testcase].testcase[0][variable];
+                testcase_value.textContent = variable + " = " + data['testcases'][testcase].testcase[0][variable];
                 testcase_value.className = 'testcase-value'
                 testcase_variables_container.appendChild(testcase_value);
             }
@@ -125,14 +122,14 @@
             testcase_button_container.appendChild(testcase_button);
             current_testcase.style.display = "none";
 
-            if (data[testcase].status == 'pass') {
+            if (data['testcases'][testcase].status == 'pass') {
                 [...current_testcase.children].forEach(element => {
                     if (element.classList[0] == "testcase-output-field") {
                         console.log(element )
                         element.style.backgroundColor = "#8ad492";
                     }
                 });
-            } else if (data[testcase].status == 'fail') {
+            } else if (data['testcases'][testcase].status == 'fail') {
                 [...current_testcase.children].forEach(element => {
                     if (element.classList[0] == "testcase-output-field") {
                         console.log(element )
@@ -141,6 +138,10 @@
                 }); 
             }
         }
+        const testcases_passed = document.createElement("div")
+        testcases_passed.textContent = `${data.passed} out of {{public_tests}}`
+        testcases_passed.className = "testcases-passed"
+        testcase_button_container.appendChild(testcases_passed)
 
         testcase_container.firstChild.style.display = "block";
     }

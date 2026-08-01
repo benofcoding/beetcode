@@ -248,9 +248,18 @@ def problem(problem_id):
         default_text = f"def {problem.function_name}{problem.function_args}:"
         print(default_text)
 
+        q = select(Test).where(Test.problem_id == problem.problem_id)
+        tests = session.scalars(q).all()
+
+        total_tests = len(tests)
+        public_tests = len([t for t in tests if t.type == "public"])
+
+
     return render_template('problem.html',
                            problem=problem,
-                           default_text=default_text)
+                           default_text=default_text,
+                           total_tests=total_tests,
+                           public_tests=public_tests)
 
 
 @app.route('/problem_list', methods=["GET", "POST"])
@@ -374,9 +383,11 @@ def run_code():
 
     wrapper = wrapper.replace('\n    ', '\n')
 
-    return_dictionary = {}
+    return_dictionary = {'testcases':{}, 'passed':0}
 
     for test in tests:
+        if test.type == 'private':
+            continue
         returned = False
         testcase = test.test
         result = subprocess.run(
@@ -400,11 +411,12 @@ def run_code():
         if returned:
             del output_lines[returned_index]
             if returned_output == test.result:
+                return_dictionary['passed'] += 1
                 status = 'pass'
             else:
                 status = 'fail'
 
-        return_dictionary[test.test_id] = \
+        return_dictionary['testcases'][test.test_id] = \
             {'output': output_lines, 'error': result.stderr,
              'status': status, 'type': test.type,
              'testcase': (test.test, test.result),
