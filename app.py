@@ -373,6 +373,8 @@ def add_problem():
             while True:
                 test_input = request.form.get(f'test_input_{test_num}')
                 print(test_input)
+                if test_input is None:
+                    break
                 expected_output = \
                     request.form.get(f'expected_output_{test_num}')
                 test_type = request.form.get(f'test_type_{test_num}')

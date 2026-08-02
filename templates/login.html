@@ -1,19 +1,35 @@
 {% extends "layout.html" %} {% block content %}
-<form method="post">
-    <div>
-        {{ form.username.label }}
-        {{ form.username() }}
-        {% if form.username.errors %}
-            <div class="field-error">{{ form.username.errors[0] }}</div>
-        {% endif %}
+<div class="signup-login-container">
+  <h1 class="signup-login-title">login</h1>
+  <hr class="signup-login-line" />
 
-        {{ form.password.label }}
-        {{ form.password() }}
-        {% if form.password.errors %}
-            <div class="field-error">{{ form.password.errors[0] }}</div>
-        {% endif %}
-
-        <button type="submit">Sign in</button>
+  <!-- login form-->
+  <form class="signup-login-form" method="post">
+    <!-- username input-->
+    <div class="signup-login-input-header-container">
+      <label class="signup-login-header">{{ form.username.label }}</label>
+      <div id="username" name="username">{{ form.username(class="signup-login-input") }}</div>
     </div>
-</form>
+
+    <!-- displays error message if needed-->
+    {% if form.password.errors %}
+        <div class="signup-login-fail-message">{{ form.password.errors[0] }}</div>
+    {% endif %}
+
+    <!-- password input -->
+    <div class="signup-login-input-header-container">
+      <label class="signup-login-header">{{ form.password.label }}</label>
+      <div id="password" name="password">{{ form.password(class="signup-login-input") }}</div>
+    </div>
+
+    <!-- sign in button-->
+    <button class="signup-login-button" type="submit"> Sign in</button>
+  </form>
+  <a class="signup-login-signup-button" href="/signup">signup</a>
+</div>
+
+<script>
+
+</script>
+
 {% endblock %}
