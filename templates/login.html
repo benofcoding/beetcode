@@ -5,6 +5,10 @@
 
   <!-- login form-->
   <form class="signup-login-form" method="post">
+    <!-- displays error message if needed-->
+    {% if form.username.errors %}
+        <div class="field-error">{{ form.username.errors[0] }}</div>
+    {% endif %}
     <!-- username input-->
     <div class="signup-login-input-header-container">
       <label class="signup-login-header">{{ form.username.label }}</label>
@@ -27,9 +31,4 @@
   </form>
   <a class="signup-login-signup-button" href="/signup">signup</a>
 </div>
-
-<script>
-
-</script>
-
 {% endblock %}
