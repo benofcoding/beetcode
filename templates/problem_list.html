@@ -1,38 +1,57 @@
 {% extends "layout.html" %} {% block content %}
-<div class="problem-list">
-    <form class="problem-list-sort-form" method="GET" action="{{ url_for('problem_list') }}">
-        <label for="sort_by">{{ form.sort_by.label.text }}</label>
-        {{ form.sort_by(class_='form-control') }}
+<div class="problem-list-container problem-list-item">
+    <h1 class="problem-list-item-header">Problem List</h1>
+    <div>
+        <form class="problem-list-sort-form" method="GET" action="{{ url_for('problem_list') }}">
+            <div>
+                <label for="sort_by">{{ form.sort_by.label.text }}</label>
+                {{ form.sort_by(class_='form-control') }}
+            </div>
+            <div>
+                <label for="filter_type">{{ form.filter_type.label.text }}</label>
+                {{ form.filter_type(class_='form-control') }}
+            </div>
+            <div>
+                <label for="filter_difficulty">{{ form.filter_difficulty.label.text }}</label>
+                {{ form.filter_difficulty(class_='form-control') }}
+            </div>
+            <div>
+                <label for="order">{{ form.order.label.text }}</label>
+                {{ form.order(class_='form-control') }}
+            </div>
 
-        <label for="filter_type">{{ form.filter_type.label.text }}</label>
-        {{ form.filter_type(class_='form-control') }}
-
-        <label for="filter_difficulty">{{ form.filter_difficulty.label.text }}</label>
-        {{ form.filter_difficulty(class_='form-control') }}
-
-        <label for="order">{{ form.order.label.text }}</label>
-        {{ form.order(class_='form-control') }}
-
-        {{ form.submit(class_='button') }}
-    </form>
-
-    <div class="problem-list-column-names">
-        <div>#</div>
-        <div>Name</div>
-        <div>type</div>
-        <div>Difficulty</div>
+            {{ form.submit(class_='button', class='problem-list-filter-button') }}
+        </form>
     </div>
-    <!-- iterate through all problems and display their information-->
-    {% for problem in problems %}
-    <hr class="problem-list-row-gap" />
-    <div class="problem-list-columns">
-        <div class="problem-list-column-container">{{ problem["problem_id"] }}</div>
-        <div class="problem-list-column-container">
-            <a class="problem-link" href="/problem/{{ problem['problem_id'] }}">{{ problem["name"] }}</a>
+    <div>
+        <div class="problem-list-column-names">
+            <div>#</div>
+            <div>Name</div>
+            <div>type</div>
+            <div>Difficulty</div>
         </div>
-        <div class="problem-list-column-container">{{ problem["type"] }}</div>
-        <div class="problem-list-column-container">{{ problem["difficulty"] }}</div>
+        <!-- iterate through all problems and display their information-->
+        {% for problem in problems %}
+        <hr class="problem-list-row-gap" />
+        <div class="problem-list-columns">
+            <div class="problem-list-column-container">{{ problem["problem_id"] }}</div>
+            <div class="problem-list-column-container">
+                <a class="problem-link" href="/problem/{{ problem['problem_id'] }}">{{ problem["name"] }}</a>
+            </div>
+            <div class="problem-list-column-container">{{ problem["type"] }}</div>
+            <div class="problem-list-column-container">{{ problem["difficulty"] }}</div>
+        </div>
+        {% endfor %}
     </div>
-    {% endfor %}
 </div>
 {% endblock %}
+
+
+
+
+  <!--main leaderboard section-->
+  <div class="leaderboard-container leaderboard-item">
+    <h1 class="leaderboard-item-header">Leaderboard</h1>
+    <!-- leaderboard-->
+
+  </div>

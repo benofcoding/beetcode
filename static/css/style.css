@@ -53,30 +53,11 @@ button {
     color: #ff0000;
 }
 
-.field-error {
-    color: #ff0000;
-    margin-bottom: 0.5em;
-}
-
 main {
     flex: 1;
     flex-direction: column;
     display: flex;
     min-height: 0;
-}
-
-body {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    font-family: 'Alfa Slab One', serif;
-    width: 100vw;
-    padding: 0;
-    margin: 0;
-    font-family: sans-serif;
-    background-color: darkgray;
-    font-size: 1vw;
-    text-decoration-color: black;
 }
 
 button {
@@ -95,7 +76,7 @@ p {
 
 .footer {
     height: 10vh;
-    background-color: green;
+    background-color: #ab91d0;
 }
 
 .main-container {
@@ -160,8 +141,35 @@ p {
 }
 
 .problem-list {
-    width: 33%;
-    align-self: center;
+    justify-self: center;
+}
+
+.problem-list-filter-button {
+    border: solid #71a7dd 0.2em;
+    white-space: nowrap;
+    padding: 0 0.5em 0 0.5em;
+    height: 2em;
+    display: flex;
+    background: #9CC9F5;
+    align-items: center;
+    border-radius: 0.25em; 
+}
+
+.problem-list-filter-button:hover {
+    background-color: #88bdf3;
+}
+
+.form-control {
+  background-color: #9cc9f5;
+  color: #000000;
+  border: solid #71a7dd 0.2em;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  cursor: pointer;
+  outline: none;
+  transition: background-color 0.2s, border-color 0.2s;
 }
 
 .problem-list-column-names {
@@ -173,6 +181,25 @@ p {
         minmax(0, 1fr) 
         minmax(0, 0.75fr) 
         minmax(0, 0.75fr);
+}
+
+.problem-list-item-header {
+    text-align: center;
+    width: fit-content;
+    justify-self: center;
+}
+
+.problem-list-item{
+    align-self: center;
+    box-shadow: 0em 0em 0.75em rgba(0, 0, 0, 0.2);
+    display: grid;
+    grid-template-columns: 1fr;
+    row-gap: 1.5vw;
+    border: 0.25vw solid #9CC9F5;
+    background-color: #ffffff;
+    padding: 1em;
+    border-radius: 0.5em;
+    width: 35em;
 }
 
 .problem-list-column-container {
@@ -190,6 +217,13 @@ p {
         minmax(0, 1fr) 
         minmax(0, 0.75fr) 
         minmax(0, 0.75fr);
+}
+
+.problem-list-sort-form {
+    display: flex;
+    flex-wrap: wrap;
+    row-gap: 1em;
+    gap: 1em;
 }
 
 .problem-list-row-gap {
