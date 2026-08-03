@@ -150,7 +150,7 @@ class SignupForm(Form):
                         message="Username must be between 3 and 20 characters")])
     password = PasswordField('Password',
         validators=[validators.InputRequired(message="Password is required")])
-    password_confirm = PasswordField('Password_confirm', validators=[
+    password_confirm = PasswordField('Password confirm', validators=[
             validators.InputRequired(message="Password confirmation is required"),
             validators.EqualTo('password', message='Passwords must match')])
 

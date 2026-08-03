@@ -188,11 +188,23 @@
 
     function submit_outcom(outcome) {
         const submit_outcome_div = document.createElement("div")
+        const submit_outcome_p = document.createElement("p")
         const editor_submit_parent = document.getElementById("editor-submit-parent")
 
         submit_outcome_div.id = 'submit-outcome-div'
-        submit_outcome_div.style.padding = '1em';
-        submit_outcome_div.textContent = `${outcome['passed']}`;
+        submit_outcome_div.className = 'testcases'
+        submit_outcome_p.textContent = `${outcome['passed']}`;
+        submit_outcome_p.style.fontWeight = 'bold'
+        submit_outcome_div.appendChild(submit_outcome_p)
+        submit_outcome_div.style.height = 'fit-content'
+        console.log(outcome)
+        if (outcome['passed'] == 'Passed') {
+            submit_outcome_div.style.backgroundColor = '#8ad492'
+        } else {
+            submit_outcome_div.style.backgroundColor = '#c95959'
+        }
+        submit_outcome_div.style.flex = 'none'
+
 
         editor_submit_parent.appendChild(submit_outcome_div)
     }
