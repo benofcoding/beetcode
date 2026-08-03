@@ -8,42 +8,48 @@
     <title>Add Problem</title>
 </head>
 <body>
-    <div class="main-container">
-        <div class="problem-description">
-            <h1>Add New Problem</h1>
-            <form id="problem-form" method="post">
-                <div>
-                    <label for="problem_name">Problem Name:</label>
-                    <input type="text" id="problem_name" name="problem_name" required>
+    <div class="add-problem-main">
+        <h1 class="add-problem-header">Add New Problem</h1>
+        <form class="add-problem-form" id="problem-form" method="post">
+            <div class="add-problem-form-inputs">
+                <div class="add-problem-info-section add-problem-section">
+                    <div>
+                        <label for="problem_name">Problem Name:</label>
+                        <input type="text" id="problem_name" name="problem_name" required>
+                    </div>
+                    <hr class="problem-list-row-gap">
+                    <div>
+                        <label for="description">Description:</label>
+                        <textarea id="description" name="description" required></textarea>
+                    </div>
+                    <hr class="problem-list-row-gap">
+                    <div>
+                        <label for="type">Type:</label>
+                        <input type="text" id="type" name="type" required>
+                    </div>
+                    <hr class="problem-list-row-gap">
+                    <div>
+                        <label for="difficulty">Difficulty:</label>
+                        <select id="difficulty" name="difficulty">
+                            <option value="Easy">Easy</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Hard">Hard</option>
+                        </select>
+                    </div>
+                    <hr class="problem-list-row-gap">
+                    <div>
+                        <label for="default_code">Default Code:</label>
+                        <input type="text" id="default_code" name="default_code" value="def function_name(args): pass">
+                    </div>
                 </div>
-                <div>
-                    <label for="description">Description:</label>
-                    <textarea id="description" name="description" required></textarea>
-                </div>
-                <div>
-                    <label for="type">Type:</label>
-                    <input type="text" id="type" name="type" required>
-                </div>
-                <div>
-                    <label for="difficulty">Difficulty:</label>
-                    <select id="difficulty" name="difficulty">
-                        <option value="Easy">Easy</option>
-                        <option value="Medium">Medium</option>
-                        <option value="Hard">Hard</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="default_code">Default Code:</label>
-                    <input type="text" id="default_code" name="default_code" value="def function_name(args): pass">
-                </div>
-                <div id="testcases-section">
+                <div class="add-problem-testcase-section add-problem-section" id="testcases-section">
                     <h3>Test Cases</h3>
                     <button type="button" onclick="addTestCase()">Add Test Case</button>
                     <div id="testcases-container"></div>
                 </div>
-                <button type="submit">Add Problem</button>
-            </form>
-        </div>
+            </div>
+            <button class="add-problem-button" type="submit">Add Problem</button>
+        </form>
     </div>
 <script>
     let testCaseCount = 0;

@@ -405,3 +405,43 @@ p {
 .run-submit-button {
     align-self: center;
 }
+
+.add-problem-main {
+    display: flex;
+    flex-direction: column;
+    row-gap: 1em;
+}
+
+.add-problem-header {
+    width: fit-content;
+    align-self: center;
+}
+
+.add-problem-form {
+    display: flex;
+    flex-direction: column;
+    row-gap: 1em;
+}
+
+.add-problem-form-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1em;
+}
+
+.add-problem-button {
+    align-self: center;
+    width: fit-content;
+}
+
+.add-problem-section {
+    box-shadow: 0em 0em 0.75em rgba(0, 0, 0, 0.2);
+    border: 0.25vw solid #9CC9F5;
+    background-color: #ffffff;
+    padding: 1em;
+    border-radius: 0.5em;
+}
+
+.problem-list-row-gap {
+    height: 0.08em;
+}
