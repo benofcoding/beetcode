@@ -58,6 +58,7 @@ main {
     flex-direction: column;
     display: flex;
     min-height: 0;
+    padding: 1em;
 }
 
 button {
@@ -83,15 +84,16 @@ p {
     flex: 1;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    height: 100%;
     min-height: 0;
+    gap: 1em;
 }
 
 .editor {
     flex: 1;
     min-height: 0;
     width: 100%;
-    overflow: hidden; /* Prevents Monaco canvas from spilling out */
+    overflow: hidden;
+    height: 100%;
 }
 
 .editor-submit-parent {
@@ -99,6 +101,7 @@ p {
     display: flex;
     flex-direction: column;
     min-height: 0;
+    box-sizing: border-box;
 }
 
 .run-submit-buttons {
@@ -113,11 +116,17 @@ p {
 }
 
 .testcases {
-    margin: 1em;
+    flex: 1;
+    align-self: center;
+    box-shadow: 0em 0em 0.75em rgba(0, 0, 0, 0.2);
+    row-gap: 1.5vw;
+    border: 0.25vw solid #9CC9F5;
+    background-color: #ffffff;
     padding: 1em;
-    background-color: blue;
-    border-radius: 1em;
-    
+    border-radius: 0.5em;
+    width: 100%;
+    box-sizing: border-box;
+    height: 100%;
 }
 
 .testcase-button-container {
@@ -247,7 +256,6 @@ p {
     justify-content: space-between;
     align-items: center;
     background-color: #ab91d0;
-    margin-bottom: 2.5vw;
     height: 3em;
 }
 
@@ -380,4 +388,20 @@ p {
     background-color: black;
     height: 0.1em;
     margin-bottom: 1em;
+}
+
+.problem-list-filter-button {
+    border: solid #71a7dd 0.2em;
+    white-space: nowrap;
+    padding: 0 0.5em 0 0.5em;
+    height: 2em;
+    display: flex;
+    background: #9CC9F5;
+    align-items: center;
+    border-radius: 0.25em; 
+    width: fit-content;
+}
+
+.run-submit-button {
+    align-self: center;
 }

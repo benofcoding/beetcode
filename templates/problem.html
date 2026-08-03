@@ -8,12 +8,12 @@
 </head>
 <body>
     <div class="main-container">
-        <div class="problem-description">{{ problem.description }}</div>
+        <div class="testcases">{{ problem.description }}</div>
         <div id="editor-submit-parent" class="editor-submit-parent">
             <div id="editor" class="editor"></div>
             <div class="run-submit-buttons">
-                <button class="run-submit-button" onclick="run_code()">▶ Run Code</button>
-                <button class="run-submit-button" onclick="submit_code()">Submit Code</button>
+                <button class="problem-list-filter-button run-submit-button" onclick="run_code()">▶ Run Code</button>
+                <button class="problem-list-filter-button run-submit-button" onclick="submit_code()">Submit Code</button>
             </div>
         </div>
         <div id="testcases" class="testcases">
@@ -118,6 +118,7 @@
             const testcase_correct_output = document.createElement("div");
             const testcase_button = document.createElement("button");
 
+            testcase_button.className = 'problem-list-filter-button'
             testcase_user_stdout.className = "testcase-output-field testcase-user-stdout"
             testcase_user_output.className = "testcase-output-field testcase-user-output"
             testcase_correct_output.className = "testcase-output-field testcase-correct-output"
