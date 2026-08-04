@@ -15,22 +15,22 @@
                 <div class="add-problem-info-section add-problem-section">
                     <div>
                         <label for="problem_name">Problem Name:</label>
-                        <input type="text" id="problem_name" name="problem_name" required>
+                        <input class="add-problem-filter-input" type="text" id="problem_name" name="problem_name" required>
                     </div>
                     <hr class="problem-list-row-gap">
                     <div>
                         <label for="description">Description:</label>
-                        <textarea id="description" name="description" required></textarea>
+                        <textarea class="add-problem-filter-input" class="description" id="description" name="description" required></textarea>
                     </div>
                     <hr class="problem-list-row-gap">
                     <div>
                         <label for="type">Type:</label>
-                        <input type="text" id="type" name="type" required>
+                        <input class="add-problem-filter-input" type="text" id="type" name="type" required>
                     </div>
                     <hr class="problem-list-row-gap">
                     <div>
                         <label for="difficulty">Difficulty:</label>
-                        <select id="difficulty" name="difficulty">
+                        <select class="form-control" id="difficulty" name="difficulty">
                             <option value="Easy">Easy</option>
                             <option value="Medium">Medium</option>
                             <option value="Hard">Hard</option>
@@ -39,16 +39,17 @@
                     <hr class="problem-list-row-gap">
                     <div>
                         <label for="default_code">Default Code:</label>
-                        <input type="text" id="default_code" name="default_code" value="def function_name(args): pass">
+                        <input class="add-problem-filter-input" type="text" id="default_code" name="default_code" value="def function_name(args): pass">
                     </div>
                 </div>
                 <div class="add-problem-testcase-section add-problem-section" id="testcases-section">
                     <h3>Test Cases</h3>
-                    <button type="button" onclick="addTestCase()">Add Test Case</button>
+                    <button class="problem-list-filter-button" type="button" onclick="addTestCase()">Add Test Case</button>
+                    <hr class="problem-list-row-gap">
                     <div id="testcases-container"></div>
                 </div>
             </div>
-            <button class="add-problem-button" type="submit">Add Problem</button>
+            <button class="problem-list-filter-button add-problem-button" type="submit">Add Problem</button>
         </form>
     </div>
 <script>
@@ -63,24 +64,26 @@
         const testCaseDiv = document.createElement('div');
         testCaseDiv.className = 'testcase-input';
         testCaseDiv.innerHTML = `
-            <h4>Test Case ${testCaseCount}</h4>
-            <div>
-                <label>Input (JSON format, e.g., {"arg1": "value1", "arg2": 2}):</label>
-                <textarea name="test_input_${testCaseCount}" required></textarea>
+            <div class='add-testcase'>
+                <h4>Test Case ${testCaseCount}</h4>
+                    <label>Input (JSON format, e.g., {"arg1": "value1", "arg2": 2}):</label>
+                    <textarea class="add-problem-filter-input" name="test_input_${testCaseCount}" required></textarea>
+                <div>
+                    <label>Expected Output:</label>
+                    <input class="add-problem-filter-input" type="text" name="expected_output_${testCaseCount}" required>
+                </div>
+                <div>
+                    <label>Type:</label>
+                    <select class="form-control" name="test_type_${testCaseCount}">
+                        <option value="public">Public</option>
+                        <option value="private">Private</option>
+                    </select>
+                </div>
+                <button class="problem-list-filter-button" type="button" onclick="removeTestCase(this)">Remove</button>
+                <hr class="problem-list-row-gap">
             </div>
-            <div>
-                <label>Expected Output:</label>
-                <input type="text" name="expected_output_${testCaseCount}" required>
-            </div>
-            <div>
-                <label>Type:</label>
-                <select name="test_type_${testCaseCount}">
-                    <option value="public">Public</option>
-                    <option value="private">Private</option>
-                </select>
-            </div>
-            <button type="button" onclick="removeTestCase(this)">Remove</button>
         `;
+
         container.appendChild(testCaseDiv);
     }
 

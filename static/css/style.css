@@ -425,7 +425,7 @@ p {
 
 .add-problem-form-inputs {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1em;
 }
 
@@ -440,8 +440,41 @@ p {
     background-color: #ffffff;
     padding: 1em;
     border-radius: 0.5em;
+    height: fit-content;
 }
 
 .problem-list-row-gap {
     height: 0.08em;
+}
+
+.description {
+    max-width: 100%;
+}
+
+.add-problem-filter-input {
+  height: 2em;
+  padding: 0 0.5em;
+  border: 0.2em solid #71a7dd;
+  border-radius: 0.25em;
+  background-color: #9CC9F5;
+  color: #222222;
+  box-sizing: border-box; /* CRITICAL: Keeps height at exactly 2em including borders */
+  outline: none; /* Removes the ugly default browser focus outline */
+  transition: border-color 0.2s, box-shadow 0.2s;
+  width: 60%;
+}
+
+.add-problem-filter-input:focus {
+  border-color: #4b89c7;
+  box-shadow: 0 0 0 0.15em rgba(156, 201, 245, 0.5);
+}
+
+.add-problem-filter-input::placeholder {
+  color: #8daecf;
+}
+
+.add-testcase {
+    display: flex;
+    flex-direction: column;
+    row-gap: 1em;
 }
