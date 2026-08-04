@@ -160,6 +160,7 @@ class SignupForm(Form):
 
 
 class ProblemListForm(Form):
+    """form for the filters on the problem list page"""
     sort_by = SelectField('Sort by', choices=[('problem_id', 'ID'),
                                               ('name', 'Name'),
                                               ('type', 'Type'),
@@ -189,6 +190,8 @@ class AddProblemForm(Form):
 
 @login_manager.user_loader
 def load_user(user_id):
+    """this route is used to load the user when they enter each page"""
+
     query = select(User).where(User.user_id == user_id)
     with Session(engine) as session:
         obj = session.scalar(query)
@@ -197,11 +200,17 @@ def load_user(user_id):
 
 @app.route("/")
 def home():
+    """redirects the empty route to problem list, the effictive home page"""
+
     return redirect(url_for("problem_list"))
 
 
 @app.route('/login', methods=["GET", 'POST'])
 def login():
+    """this route is responsible for the login page,
+    it checks if the users creditntials are correct and
+    logs them in or sends them back to the login page to try again"""
+
     form = LoginForm(request.form)
     if request.method == "POST":
         if not form.validate():
@@ -226,6 +235,10 @@ def login():
 
 @app.route('/signup', methods=["GET", "POST"])
 def signup():
+    """this route is responsible for the signup page,
+    it checks if the users creditntials are correct and
+    signs them up or sends them back to the signup page to try again"""
+
     form = SignupForm(request.form)
     if request.method == "POST":
         if not form.validate():
@@ -256,6 +269,8 @@ def signup():
 @app.route("/logout")
 @login_required
 def logout():
+    """this route logs the user out"""
+
     logout_user()
     return redirect(url_for('login'))
 
@@ -263,35 +278,33 @@ def logout():
 @app.route("/problem/<problem_id>")
 @login_required
 def problem(problem_id):
+    """this route is responsible for the problem page, it recives a
+    problem id and then gets the information pertaining to that
+    problem, and then sends it to the html to load the problem"""
+
     with Session(engine) as session:
         q = select(Problem).where(Problem.problem_id == problem_id)
         problem = session.scalar(q)
-        print(problem)
         if problem is None:
             return redirect(url_for('problem_list'))
+
+        # format the default function that will appear for the problem
         default_text = f"def {problem.function_name}{problem.function_args}:"
-        print(default_text)
 
         q = select(Test).where(Test.problem_id == problem.problem_id)
         tests = session.scalars(q).all()
 
         total_tests = len(tests)
-        public_tests = len([t for t in tests if t.type == "public"])
-
-        print(current_user.id)
+        public_tests = len([i for i in tests if i.type == "public"])
 
         q = select(User_Problem).where(User_Problem.problem_id == problem.problem_id,
                                        User_Problem.user_id == current_user.id)
         user_problem = session.scalar(q)
 
-        print(user_problem)
-
         code = ''
         if user_problem:
             code = user_problem.solution
             code = code.partition('\n')[2]
-
-        print(code)
 
     return render_template('problem.html',
                            problem=problem,
@@ -304,27 +317,37 @@ def problem(problem_id):
 @app.route('/problem_list', methods=["GET", "POST"])
 @login_required
 def problem_list():
+    """this route is responsible for the problem list page, it gets a list
+    of all of the problems and sends their information to the html
+    to be rendered, it also handles the filters and sorts for the list"""
+
     with Session(engine) as session:
+        #get list of all problem types
         q = select(Problem.type).distinct().order_by(Problem.type)
         problem_types = session.scalars(q).all()
 
+        # get list of all difficulites
         q = select(Problem.difficulty).distinct().order_by(Problem.difficulty)
         difficulties = session.scalars(q).all()
 
+        # add the types and difficulties as choices for the filters
         form = ProblemListForm(request.args)
         form.filter_type.choices += [(t, t) for t in problem_types]
         form.filter_difficulty.choices += [(d, d) for d in difficulties]
 
+        # get default values for all inputs
         sort_by = form.sort_by.data or 'problem_id'
         order = form.order.data or 'asc'
         filter_type = form.filter_type.data or 'all'
         filter_difficulty = form.filter_difficulty.data or 'all'
 
+        # associate users input with sqlalchemy statment for sorting
         sort_columns = {'problem_id': Problem.problem_id,
                         'name': Problem.problem_name,
                         'type': Problem.type, 'difficulty': Problem.difficulty}
         sort_column = sort_columns[sort_by]
 
+        # assemble the sqlalchemy query
         q = select(Problem)
         if filter_type != 'all':
             q = q.where(Problem.type == filter_type)
@@ -335,9 +358,8 @@ def problem_list():
         else:
             q = q.order_by(sort_column.collate("NOCASE").asc())
 
-        print(q)
+        # create list of problems to send off
         temp_problems = session.scalars(q).all()
-        print(temp_problems)
         problems = [{'problem_id': i.problem_id,
                      'name': i.problem_name,
                      'difficulty': i.difficulty,
@@ -349,6 +371,10 @@ def problem_list():
 @app.route('/add_problem', methods=['GET', 'POST'])
 @login_required
 def add_problem():
+    """this route is responsible for the add problem page, it
+    receives the information about a proble from the html
+    and then adds it to the database, including the testcases"""
+
     if current_user.role != 'admin':
         return redirect(url_for('problem_list'))
 
@@ -359,12 +385,15 @@ def add_problem():
         difficulty = request.form.get('difficulty')
         default_code = request.form.get('default_code')
 
+        # format the default text and fuction
+        # call based on what info was inputed
         default_code = default_code.removeprefix("def ").removesuffix(":")
 
         function_name, function_args = default_code.split("(", 1)
         function_args = "(" + function_args
 
         with Session(engine) as session:
+            #create and add new problem to database
             new_problem = Problem(problem_name=problem_name,
                                   description=description,
                                   function_name=function_name,
@@ -375,9 +404,10 @@ def add_problem():
             session.flush()
 
             test_num = 1
+            # format all testcases and add them
+            # to database with link to problem
             while True:
                 test_input = request.form.get(f'test_input_{test_num}')
-                print(test_input)
                 if test_input is None:
                     break
                 expected_output = \
@@ -398,6 +428,10 @@ def add_problem():
 
 @app.route('/run_code', methods=['POST'])
 def run_code():
+    """this route is used for running the users code, it recieves
+    the users code and testcases from the problem page and then
+    runs the code against the testcases and sends back the results"""
+
     print_limit = 1000
 
     data = request.get_json()
@@ -468,11 +502,14 @@ def run_code():
 
 @app.route('/submit_code', methods=['POST'])
 def submit_code():
+    """this route is used for submiting the users code, it recieves
+    the users code and testcases from the problem page and then
+    runs the code against the testcases and sends back the results"""
+
     print_limit = 1000
 
     data = request.get_json()
     code = data['code']
-    print(code)
     problem_id = data['problem_id']
 
     with Session(engine) as session:
@@ -492,8 +529,6 @@ result = {problem.function_name}(**data)
 if result is not None:
     print('__RETURN__',  result)
     """
-
-    print(wrapper)
 
     return_dictionary = {'testcase_info': {'testcases': {}, 'passed': 0},
                          'submit_info': {}}
