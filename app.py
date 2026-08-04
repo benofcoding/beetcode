@@ -147,11 +147,15 @@ class SignupForm(Form):
         "Name",
         validators=[validators.InputRequired(message="Username is required"),
                     validators.Length(min=3, max=20,
-                        message="Username must be between 3 and 20 characters")])
+                                      message="Username must be "
+                                      "between 3 and 20 characters")])
     password = PasswordField('Password',
-        validators=[validators.InputRequired(message="Password is required")])
+                             validators=[
+                             validators.InputRequired(message="Password "
+                                                       "is required")])
     password_confirm = PasswordField('Password confirm', validators=[
-            validators.InputRequired(message="Password confirmation is required"),
+            validators.InputRequired(message="Password confirmation "
+                                     "is required"),
             validators.EqualTo('password', message='Passwords must match')])
 
 
@@ -263,7 +267,7 @@ def problem(problem_id):
         q = select(Problem).where(Problem.problem_id == problem_id)
         problem = session.scalar(q)
         print(problem)
-        if problem == None:
+        if problem is None:
             return redirect(url_for('problem_list'))
         default_text = f"def {problem.function_name}{problem.function_args}:"
         print(default_text)
@@ -276,7 +280,8 @@ def problem(problem_id):
 
         print(current_user.id)
 
-        q = select(User_Problem).where(User_Problem.problem_id == problem.problem_id, User_Problem.user_id == current_user.id)
+        q = select(User_Problem).where(User_Problem.problem_id == problem.problem_id,
+                                       User_Problem.user_id == current_user.id)
         user_problem = session.scalar(q)
 
         print(user_problem)
@@ -419,7 +424,7 @@ def run_code():
 
     wrapper = wrapper.replace('\n    ', '\n')
 
-    return_dictionary = {'testcases':{}, 'passed':0}
+    return_dictionary = {'testcases': {}, 'passed': 0}
 
     for test in tests:
         if test.type == 'private':
@@ -490,8 +495,8 @@ if result is not None:
 
     print(wrapper)
 
-    return_dictionary = {'testcase_info':{'testcases':{}, 'passed':0},
-                         'submit_info':{}}
+    return_dictionary = {'testcase_info': {'testcases': {}, 'passed': 0},
+                         'submit_info': {}}
 
     for test in tests:
         returned = False
@@ -528,39 +533,41 @@ if result is not None:
              'testcase': (test.test, test.result),
              'returned_output': returned_output}
 
-
     if return_dictionary['testcase_info']['passed'] != total_tests:
         return_dictionary['submit_info']['passed'] = 'Falied'
         with Session(engine) as session:
-            q = select(User_Problem).where(User_Problem.problem_id == problem.problem_id, User_Problem.user_id == current_user.id)
+            q = select(User_Problem).where(User_Problem.problem_id == problem.problem_id,
+                                           User_Problem.user_id == current_user.id)
             user_problem = session.scalar(q)
             if user_problem:
                 user_problem.solution = code
                 session.commit()
             else:
-                new_user_problem = User_Problem(user_id = current_user.id, problem_id = problem.problem_id,
-                                    solution = code, status = 'attempted')
+                new_user_problem = User_Problem(user_id=current_user.id,
+                                                problem_id=problem.problem_id,
+                                                solution=code, status='attempted')
                 session.add(new_user_problem)
                 session.commit()
 
     else:
         return_dictionary['submit_info']['passed'] = 'Passed'
         with Session(engine) as session:
-            q = select(User_Problem).where(User_Problem.problem_id == problem.problem_id, User_Problem.user_id == current_user.id)
+            q = select(User_Problem).where(User_Problem.problem_id == problem.problem_id,
+                                           User_Problem.user_id == current_user.id)
             user_problem = session.scalar(q)
             if user_problem:
                 user_problem.status = 'completed'
                 user_problem.solution = code
                 session.commit()
             else:
-                new_user_problem = User_Problem(user_id = current_user.id, problem_id = problem.problem_id,
-                                    solution = code, status = 'completed')
+                new_user_problem = User_Problem(user_id=current_user.id,
+                                                problem_id=problem.problem_id,
+                                                solution=code, status='completed')
                 session.add(new_user_problem)
                 session.commit()
 
-
-
     return jsonify(return_dictionary)
+
 
 if __name__ == "__main__":
     app.run(debug=True)
