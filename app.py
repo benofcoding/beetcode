@@ -393,7 +393,7 @@ def add_problem():
         function_args = "(" + function_args
 
         with Session(engine) as session:
-            #create and add new problem to database
+            # create and add new problem to database
             new_problem = Problem(problem_name=problem_name,
                                   description=description,
                                   function_name=function_name,
@@ -434,16 +434,20 @@ def run_code():
 
     print_limit = 1000
 
+    # get users code and format it
     data = request.get_json()
     code = data['code']
     code = code.replace('\n', '\n    ')
     problem_id = data['problem_id']
 
+    # get testcases
     with Session(engine) as session:
         q = select(Problem).where(Problem.problem_id == problem_id)
         problem = session.scalar(q)
         tests = problem.tests
 
+    # creats full code that will be run against testcases,
+    # nessecary to actually collect output
     wrapper = f"""
     import json, sys
     data = json.loads(sys.stdin.read())
@@ -460,11 +464,13 @@ def run_code():
 
     return_dictionary = {'testcases': {}, 'passed': 0}
 
+    # run the code against each testcase
     for test in tests:
         if test.type == 'private':
             continue
         returned = False
         testcase = test.test
+        # this line runs it.
         result = subprocess.run(
             [sys.executable, "-c", wrapper],
             input=json.dumps(testcase),
@@ -473,6 +479,7 @@ def run_code():
 
         returned_output = None
 
+        # get the coutput, and go through each line to check if it returned
         output_lines = list(result.stdout.splitlines())
         if len(output_lines) <= print_limit:
             for index, line in enumerate(output_lines):
@@ -483,6 +490,7 @@ def run_code():
 
         status = 'not returned'
 
+        # if it returned then check if what was returned matches test case
         if returned:
             del output_lines[returned_index]
             if returned_output == test.result:
@@ -491,6 +499,7 @@ def run_code():
             else:
                 status = 'fail'
 
+        # assemble a dectionary with all the information needed for the html
         return_dictionary['testcases'][test.test_id] = \
             {'output': output_lines, 'error': result.stderr,
              'status': status, 'type': test.type,
@@ -568,6 +577,11 @@ if result is not None:
              'testcase': (test.test, test.result),
              'returned_output': returned_output}
 
+    # all of the above is identical to the run
+    # code route, check that for code comments
+
+    # if it passed all the tests, then update the database with the users
+    # solution, store it passed, and send that information to the html
     if return_dictionary['testcase_info']['passed'] != total_tests:
         return_dictionary['submit_info']['passed'] = 'Falied'
         with Session(engine) as session:
@@ -584,6 +598,8 @@ if result is not None:
                 session.add(new_user_problem)
                 session.commit()
 
+    # if it failed some of the tests, then update the database with the users
+    # solution, store it failed, and send that information to the html
     else:
         return_dictionary['submit_info']['passed'] = 'Passed'
         with Session(engine) as session:
