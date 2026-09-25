@@ -5,6 +5,7 @@
 
   <!-- login form-->
   <form class="signup-login-form" method="post">
+    {{ form.hidden_tag() }}
     <!-- displays error message if needed-->
     {% if form.username.errors %}
         <div class="field-error">{{ form.username.errors[0] }}</div>
