@@ -4,6 +4,7 @@ from flask import (Flask,
                    request,
                    jsonify,
                    url_for)
+from flask_wtf import FlaskForm, CSRFProtect
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import (DeclarativeBase,
                             Mapped,
@@ -38,6 +39,7 @@ import json
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "a-very-secret-secret-key"
+csrf = CSRFProtect(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
@@ -132,7 +134,7 @@ class Tag(Base):
 engine = create_engine("sqlite:///instance/database.db")
 
 
-class LoginForm(Form):
+class LoginForm(FlaskForm):
     username = StringField(
         "Name",
         validators=[validators.InputRequired(message="Username is required")]
@@ -143,7 +145,7 @@ class LoginForm(Form):
     )
 
 
-class SignupForm(Form):
+class SignupForm(FlaskForm):
     username = StringField(
         "Name",
         validators=[validators.InputRequired(message="Username is required"),
@@ -160,7 +162,7 @@ class SignupForm(Form):
             validators.EqualTo('password', message='Passwords must match')])
 
 
-class ProblemListForm(Form):
+class ProblemListForm(FlaskForm):
     """form for the filters on the problem list page"""
     sort_by = SelectField('Sort by', choices=[('problem_id', 'ID'),
                                               ('name', 'Name'),
@@ -176,13 +178,11 @@ class ProblemListForm(Form):
     submit = SubmitField('Apply')
 
 
-class AddProblemForm(Form):
+class AddProblemForm(FlaskForm):
     problem_name = StringField('Problem Name', validators=[DataRequired()])
     description = StringField('Description', validators=[DataRequired()])
-    function_name = StringField('Function Name', validators=[DataRequired()])
-    function_args = StringField('Function Arguments',
-                                validators=[DataRequired()])
     type = StringField('Type', validators=[DataRequired()])
+    default_code = StringField('Default Code', validators=[DataRequired()])
     difficulty = SelectField('Difficulty', choices=[('Easy', 'Easy'),
                                                     ('Medium', 'Medium'),
                                                     ('Hard', 'Hard')])
@@ -212,11 +212,8 @@ def login():
     it checks if the users creditntials are correct and
     logs them in or sends them back to the login page to try again"""
 
-    form = LoginForm(request.form)
-    if request.method == "POST":
-        if not form.validate():
-            return render_template("login.html", form=form)
-
+    form = LoginForm()
+    if form.validate_on_submit():
         with Session(engine) as session:
             query = select(User).where(User.name == form.username.data)
             user = session.scalar(query)
@@ -238,11 +235,8 @@ def signup():
     it checks if the users creditntials are correct and
     signs them up or sends them back to the signup page to try again"""
 
-    form = SignupForm(request.form)
-    if request.method == "POST":
-        if not form.validate():
-            return render_template("signup.html", form=form)
-
+    form = SignupForm()
+    if form.validate_on_submit():
         with Session(engine) as session:
             query = select(User).where(User.name == form.username.data)
             existing_user = session.scalar(query)
@@ -263,7 +257,7 @@ def signup():
     return render_template("signup.html", form=form)
 
 
-@app.route("/logout")
+@app.route("/logout", methods=["POST"])
 @login_required
 def logout():
     """this route logs the user out"""
@@ -328,7 +322,8 @@ def problem_list():
         difficulties = session.scalars(q).all()
 
         # add the types and difficulties as choices for the filters
-        form = ProblemListForm(request.args)
+        form = ProblemListForm()
+        form.process(formdata=request.args)
         form.filter_type.choices += [(t, t) for t in problem_types]
         form.filter_difficulty.choices += [(d, d) for d in difficulties]
 
@@ -375,18 +370,25 @@ def add_problem():
     if current_user.role != 'admin':
         return redirect(url_for('problem_list'))
 
-    if request.method == 'POST':
-        problem_name = request.form.get('problem_name')
-        description = request.form.get('description')
-        type_ = request.form.get('type')
-        difficulty = request.form.get('difficulty')
-        default_code = request.form.get('default_code')
+    form = AddProblemForm()
+    if form.validate_on_submit():
+        problem_name = form.problem_name.data
+        description = form.description.data
+        type_ = form.type.data
+        difficulty = form.difficulty.data
+        default_code = form.default_code.data
 
         # format the default text and fuction
         # call based on what info was inputed
         default_code = default_code.removeprefix("def ").removesuffix(":")
 
-        function_name, function_args = default_code.split("(", 1)
+        try:
+            function_name, function_args = default_code.split("(", 1)
+        except ValueError:
+            form.default_code.errors.append(
+                "Default code must include a function name and arguments"
+            )
+            return render_template('add_problem.html', form=form)
         function_args = "(" + function_args
 
         with Session(engine) as session:
@@ -411,7 +413,13 @@ def add_problem():
                     request.form.get(f'expected_output_{test_num}')
                 test_type = request.form.get(f'test_type_{test_num}')
 
-                test_data = json.loads(test_input)
+                try:
+                    test_data = json.loads(test_input)
+                except json.JSONDecodeError:
+                    form.description.errors.append(
+                        f"Test case {test_num} must contain valid JSON"
+                    )
+                    return render_template('add_problem.html', form=form)
 
                 new_test = Test(test=test_data, type=test_type,
                                 problem_id=new_problem.problem_id,
@@ -420,7 +428,7 @@ def add_problem():
                 test_num += 1
             session.commit()
         return redirect(url_for('problem_list'))
-    return render_template('add_problem.html')
+    return render_template('add_problem.html', form=form)
 
 
 @app.route('/run_code', methods=['POST'])

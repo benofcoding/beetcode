@@ -11,35 +11,40 @@
     <div class="add-problem-main">
         <h1 class="add-problem-header">Add New Problem</h1>
         <form class="add-problem-form" id="problem-form" method="post">
+            {{ form.hidden_tag() }}
+            {% if form.errors %}
+                <div class="field-error">Please correct the highlighted form errors.</div>
+                {% for field_errors in form.errors.values() %}
+                    {% for error in field_errors %}
+                        <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                {% endfor %}
+            {% endif %}
             <div class="add-problem-form-inputs">
                 <div class="add-problem-info-section add-problem-section">
                     <div>
                         <label for="problem_name">Problem Name:</label>
-                        <input class="add-problem-filter-input" type="text" id="problem_name" name="problem_name" required>
+                        {{ form.problem_name(class="add-problem-filter-input", required=true) }}
                     </div>
                     <hr class="problem-list-row-gap">
                     <div>
                         <label for="description">Description:</label>
-                        <textarea class="add-problem-filter-input" class="description" id="description" name="description" required></textarea>
+                        {{ form.description(class="add-problem-filter-input", required=true) }}
                     </div>
                     <hr class="problem-list-row-gap">
                     <div>
                         <label for="type">Type:</label>
-                        <input class="add-problem-filter-input" type="text" id="type" name="type" required>
+                        {{ form.type(class="add-problem-filter-input", required=true) }}
                     </div>
                     <hr class="problem-list-row-gap">
                     <div>
                         <label for="difficulty">Difficulty:</label>
-                        <select class="form-control" id="difficulty" name="difficulty">
-                            <option value="Easy">Easy</option>
-                            <option value="Medium">Medium</option>
-                            <option value="Hard">Hard</option>
-                        </select>
+                        {{ form.difficulty(class="form-control") }}
                     </div>
                     <hr class="problem-list-row-gap">
                     <div>
                         <label for="default_code">Default Code:</label>
-                        <input class="add-problem-filter-input" type="text" id="default_code" name="default_code" value="def function_name(args): pass">
+                        {{ form.default_code(class="add-problem-filter-input", value=form.default_code.data or "def function_name(args): pass", required=true) }}
                     </div>
                 </div>
                 <div class="add-problem-testcase-section add-problem-section" id="testcases-section">
