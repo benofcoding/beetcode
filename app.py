@@ -29,7 +29,8 @@ from flask_login import (UserMixin,
                          login_required,
                          logout_user,
                          current_user)
-from hashlib import sha256
+from werkzeug.security import (check_password_hash,
+                               generate_password_hash)
 import subprocess
 import sys
 import json
@@ -220,11 +221,9 @@ def login():
             query = select(User).where(User.name == form.username.data)
             user = session.scalar(query)
 
-        h = sha256()
-        h.update(form.password.data.encode())
-        user_hash = h.hexdigest()
-
-        if user is None or user_hash != user.hash:
+        # check that user credentials do not match the database
+        if user is None or not check_password_hash(user.hash,
+                                                   form.password.data):
             form.password.errors.append("Username or password failed")
             return render_template("login.html", form=form)
 
@@ -251,9 +250,7 @@ def signup():
                 form.username.errors.append("Username is already in use")
                 return render_template("signup.html", form=form)
 
-            h = sha256()
-            h.update(form.password.data.encode())
-            password_hash = h.hexdigest()
+            password_hash = generate_password_hash(form.password.data)
 
             new_user = User(name=form.username.data,
                             role='normal',
