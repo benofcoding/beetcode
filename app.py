@@ -1,11 +1,11 @@
 import sys
 
-# prevents unnecassary pycache files from being created
-sys.dont_write_bytecode = True
-
 from flask import Flask
 from flask_login import LoginManager
 from flask_wtf import CSRFProtect
+
+# prevents unnecassary pycache files from being created
+sys.dont_write_bytecode = True
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "a-very-secret-secret-key"
